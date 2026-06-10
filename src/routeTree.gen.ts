@@ -9,8 +9,50 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TracingRouteImport } from './routes/tracing'
+import { Route as ShapesRouteImport } from './routes/shapes'
+import { Route as ParentRouteImport } from './routes/parent'
+import { Route as NumbersRouteImport } from './routes/numbers'
+import { Route as ColorsRouteImport } from './routes/colors'
+import { Route as AnimalsRouteImport } from './routes/animals'
+import { Route as AbcRouteImport } from './routes/abc'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TracingRoute = TracingRouteImport.update({
+  id: '/tracing',
+  path: '/tracing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShapesRoute = ShapesRouteImport.update({
+  id: '/shapes',
+  path: '/shapes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParentRoute = ParentRouteImport.update({
+  id: '/parent',
+  path: '/parent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NumbersRoute = NumbersRouteImport.update({
+  id: '/numbers',
+  path: '/numbers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ColorsRoute = ColorsRouteImport.update({
+  id: '/colors',
+  path: '/colors',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnimalsRoute = AnimalsRouteImport.update({
+  id: '/animals',
+  path: '/animals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AbcRoute = AbcRouteImport.update({
+  id: '/abc',
+  path: '/abc',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +61,130 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/abc': typeof AbcRoute
+  '/animals': typeof AnimalsRoute
+  '/colors': typeof ColorsRoute
+  '/numbers': typeof NumbersRoute
+  '/parent': typeof ParentRoute
+  '/shapes': typeof ShapesRoute
+  '/tracing': typeof TracingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/abc': typeof AbcRoute
+  '/animals': typeof AnimalsRoute
+  '/colors': typeof ColorsRoute
+  '/numbers': typeof NumbersRoute
+  '/parent': typeof ParentRoute
+  '/shapes': typeof ShapesRoute
+  '/tracing': typeof TracingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/abc': typeof AbcRoute
+  '/animals': typeof AnimalsRoute
+  '/colors': typeof ColorsRoute
+  '/numbers': typeof NumbersRoute
+  '/parent': typeof ParentRoute
+  '/shapes': typeof ShapesRoute
+  '/tracing': typeof TracingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/abc'
+    | '/animals'
+    | '/colors'
+    | '/numbers'
+    | '/parent'
+    | '/shapes'
+    | '/tracing'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/abc'
+    | '/animals'
+    | '/colors'
+    | '/numbers'
+    | '/parent'
+    | '/shapes'
+    | '/tracing'
+  id:
+    | '__root__'
+    | '/'
+    | '/abc'
+    | '/animals'
+    | '/colors'
+    | '/numbers'
+    | '/parent'
+    | '/shapes'
+    | '/tracing'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AbcRoute: typeof AbcRoute
+  AnimalsRoute: typeof AnimalsRoute
+  ColorsRoute: typeof ColorsRoute
+  NumbersRoute: typeof NumbersRoute
+  ParentRoute: typeof ParentRoute
+  ShapesRoute: typeof ShapesRoute
+  TracingRoute: typeof TracingRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tracing': {
+      id: '/tracing'
+      path: '/tracing'
+      fullPath: '/tracing'
+      preLoaderRoute: typeof TracingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shapes': {
+      id: '/shapes'
+      path: '/shapes'
+      fullPath: '/shapes'
+      preLoaderRoute: typeof ShapesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parent': {
+      id: '/parent'
+      path: '/parent'
+      fullPath: '/parent'
+      preLoaderRoute: typeof ParentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/numbers': {
+      id: '/numbers'
+      path: '/numbers'
+      fullPath: '/numbers'
+      preLoaderRoute: typeof NumbersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/colors': {
+      id: '/colors'
+      path: '/colors'
+      fullPath: '/colors'
+      preLoaderRoute: typeof ColorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/animals': {
+      id: '/animals'
+      path: '/animals'
+      fullPath: '/animals'
+      preLoaderRoute: typeof AnimalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/abc': {
+      id: '/abc'
+      path: '/abc'
+      fullPath: '/abc'
+      preLoaderRoute: typeof AbcRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,17 +197,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AbcRoute: AbcRoute,
+  AnimalsRoute: AnimalsRoute,
+  ColorsRoute: ColorsRoute,
+  NumbersRoute: NumbersRoute,
+  ParentRoute: ParentRoute,
+  ShapesRoute: ShapesRoute,
+  TracingRoute: TracingRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
