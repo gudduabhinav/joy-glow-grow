@@ -1,5 +1,6 @@
-// Tiny Genius audio helpers — uses Web Speech API for narration.
-// Works offline once the OS has voices installed (true on iOS/Android/macOS/Windows).
+// Tiny Genius audio helpers — Web Speech API for narration + Web Audio for SFX.
+// Bilingual: picks the best voice for the requested language (en-US or hi-IN).
+import { getLang, speechLang, type Lang } from "./i18n";
 
 let cachedVoices: SpeechSynthesisVoice[] | null = null;
 
@@ -16,18 +17,21 @@ if (typeof window !== "undefined" && "speechSynthesis" in window) {
   };
 }
 
-export function speak(text: string, opts: { rate?: number; pitch?: number; lang?: string } = {}) {
+export function speak(text: string, opts: { rate?: number; pitch?: number; lang?: Lang } = {}) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
   try {
     window.speechSynthesis.cancel();
+    const lang = opts.lang ?? getLang();
+    const ttsLang = speechLang[lang];
     const u = new SpeechSynthesisUtterance(text);
-    u.rate = opts.rate ?? 0.85;
+    u.rate = opts.rate ?? (lang === "hi" ? 0.8 : 0.85);
     u.pitch = opts.pitch ?? 1.3;
-    u.lang = opts.lang ?? "en-US";
+    u.lang = ttsLang;
     const voices = getVoices();
-    // Prefer a child-friendly or female voice if available
-    const preferred = voices.find((v) => /child|kid|samantha|karen|google.*female/i.test(v.name))
-      ?? voices.find((v) => v.lang.startsWith(u.lang));
+    const preferred =
+      voices.find((v) => v.lang.toLowerCase().startsWith(ttsLang.toLowerCase().slice(0, 2)) && /female|google|samantha|karen|child|kid/i.test(v.name))
+      ?? voices.find((v) => v.lang.toLowerCase().startsWith(ttsLang.toLowerCase().slice(0, 2)))
+      ?? voices.find((v) => v.lang.startsWith(lang));
     if (preferred) u.voice = preferred;
     window.speechSynthesis.speak(u);
   } catch {
@@ -35,7 +39,6 @@ export function speak(text: string, opts: { rate?: number; pitch?: number; lang?
   }
 }
 
-// Simple synthesized "pop" / "ding" using Web Audio — no asset download needed.
 let audioCtx: AudioContext | null = null;
 function ctx() {
   if (typeof window === "undefined") return null;
