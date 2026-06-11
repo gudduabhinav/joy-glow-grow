@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TracingRouteImport } from './routes/tracing'
 import { Route as ShapesRouteImport } from './routes/shapes'
+import { Route as RhymesRouteImport } from './routes/rhymes'
 import { Route as ParentRouteImport } from './routes/parent'
 import { Route as NumbersRouteImport } from './routes/numbers'
 import { Route as ColorsRouteImport } from './routes/colors'
@@ -26,6 +27,11 @@ const TracingRoute = TracingRouteImport.update({
 const ShapesRoute = ShapesRouteImport.update({
   id: '/shapes',
   path: '/shapes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RhymesRoute = RhymesRouteImport.update({
+  id: '/rhymes',
+  path: '/rhymes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParentRoute = ParentRouteImport.update({
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/colors': typeof ColorsRoute
   '/numbers': typeof NumbersRoute
   '/parent': typeof ParentRoute
+  '/rhymes': typeof RhymesRoute
   '/shapes': typeof ShapesRoute
   '/tracing': typeof TracingRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/colors': typeof ColorsRoute
   '/numbers': typeof NumbersRoute
   '/parent': typeof ParentRoute
+  '/rhymes': typeof RhymesRoute
   '/shapes': typeof ShapesRoute
   '/tracing': typeof TracingRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/colors': typeof ColorsRoute
   '/numbers': typeof NumbersRoute
   '/parent': typeof ParentRoute
+  '/rhymes': typeof RhymesRoute
   '/shapes': typeof ShapesRoute
   '/tracing': typeof TracingRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/colors'
     | '/numbers'
     | '/parent'
+    | '/rhymes'
     | '/shapes'
     | '/tracing'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/colors'
     | '/numbers'
     | '/parent'
+    | '/rhymes'
     | '/shapes'
     | '/tracing'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/colors'
     | '/numbers'
     | '/parent'
+    | '/rhymes'
     | '/shapes'
     | '/tracing'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   ColorsRoute: typeof ColorsRoute
   NumbersRoute: typeof NumbersRoute
   ParentRoute: typeof ParentRoute
+  RhymesRoute: typeof RhymesRoute
   ShapesRoute: typeof ShapesRoute
   TracingRoute: typeof TracingRoute
 }
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/shapes'
       fullPath: '/shapes'
       preLoaderRoute: typeof ShapesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rhymes': {
+      id: '/rhymes'
+      path: '/rhymes'
+      fullPath: '/rhymes'
+      preLoaderRoute: typeof RhymesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parent': {
@@ -202,9 +222,20 @@ const rootRouteChildren: RootRouteChildren = {
   ColorsRoute: ColorsRoute,
   NumbersRoute: NumbersRoute,
   ParentRoute: ParentRoute,
+  RhymesRoute: RhymesRoute,
   ShapesRoute: ShapesRoute,
   TracingRoute: TracingRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

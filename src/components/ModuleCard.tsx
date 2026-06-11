@@ -7,14 +7,15 @@ interface ModuleCardProps {
   emoji: string;
   gradient: string;
   description?: string;
+  className?: string;
   children?: ReactNode;
 }
 
-export function ModuleCard({ to, title, emoji, gradient, description }: ModuleCardProps) {
+export function ModuleCard({ to, title, emoji, gradient, description, className }: ModuleCardProps) {
   return (
     <Link
       to={to}
-      className={`group relative block rounded-3xl ${gradient} p-5 shadow-pop overflow-hidden active:scale-[0.97] transition-transform min-h-[140px]`}
+      className={`group relative block rounded-3xl ${gradient} p-5 shadow-pop overflow-hidden active:scale-[0.97] transition-transform min-h-[140px] ${className || ""}`}
     >
       <span className="absolute -top-6 -right-6 size-28 rounded-full bg-white/30 blur-2xl" aria-hidden />
       <span className="absolute bottom-2 right-3 text-6xl drop-shadow-md group-active:animate-bounce-big" aria-hidden>

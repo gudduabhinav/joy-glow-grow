@@ -47,6 +47,8 @@ const D = {
   colorsDesc: { en: "Splash & play", hi: "रंगों से खेलो" },
   animals: { en: "Animals", hi: "जानवर" },
   animalsDesc: { en: "Sounds & names", hi: "आवाज़ और नाम" },
+  rhymes: { en: "Rhymes", hi: "बाल कविताएं" },
+  rhymesDesc: { en: "Fun songs & poems", hi: "मज़ेदार कविताएं" },
   footer: { en: "Ad-free • Safe for ages 1–3 • Works offline", hi: "विज्ञापन मुक्त • १-३ साल के लिए • ऑफलाइन भी" },
   hello: { en: "Hi! Let's learn together!", hi: "नमस्ते! चलो साथ सीखें!" },
   praise: {
@@ -90,9 +92,9 @@ export const NUMBERS_DATA: { n: number; en: string; hi: string; hiNum: string; e
 ];
 
 export const SHAPES_DATA: { id: string; en: string; hi: string; emoji: string; svg: string }[] = [
-  { id: "circle", en: "Circle", hi: "गोल", emoji: "⚪", svg: "circle" },
-  { id: "square", en: "Square", hi: "चौकोर", emoji: "🟦", svg: "square" },
-  { id: "triangle", en: "Triangle", hi: "तिकोना", emoji: "🔺", svg: "triangle" },
+  { id: "circle", en: "Circle", hi: "वृत्त", emoji: "⚪", svg: "circle" },
+  { id: "square", en: "Square", hi: "वर्ग", emoji: "🟦", svg: "square" },
+  { id: "triangle", en: "Triangle", hi: "त्रिकोण", emoji: "🔺", svg: "triangle" },
   { id: "star", en: "Star", hi: "तारा", emoji: "⭐", svg: "star" },
   { id: "heart", en: "Heart", hi: "दिल", emoji: "❤️", svg: "heart" },
   { id: "rectangle", en: "Rectangle", hi: "आयत", emoji: "▬", svg: "rectangle" },

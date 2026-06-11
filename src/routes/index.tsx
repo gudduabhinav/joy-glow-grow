@@ -57,6 +57,7 @@ function Home() {
       </section>
 
       <section className="px-4 grid grid-cols-2 gap-4">
+        <ModuleCard to="/rhymes" title={t("rhymes", lang)} emoji="🎶" gradient="bg-gradient-rhymes" description={t("rhymesDesc", lang)} className="col-span-2" />
         <ModuleCard to="/abc" title={t("abc", lang)} emoji="🅰️" gradient="bg-gradient-abc" description={t("abcDesc", lang)} />
         <ModuleCard to="/numbers" title={t("numbers", lang)} emoji="🔢" gradient="bg-gradient-numbers" description={t("numbersDesc", lang)} />
         <ModuleCard to="/tracing" title={t("trace", lang)} emoji="✏️" gradient="bg-gradient-tracing" description={t("traceDesc", lang)} />

@@ -2,51 +2,59 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { speak, pop, chime, haptic } from "@/lib/audio";
 import { markLetter } from "@/lib/progress";
-import { HINDI_LETTERS, useLang } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n";
 import { LangToggle } from "@/components/LangToggle";
 
 export const Route = createFileRoute("/abc")({
   head: () => ({
     meta: [
       { title: "ABC — Tiny Genius" },
-      { name: "description", content: "Learn letters A–Z and Hindi क ख ग with sounds and pictures." },
+      { name: "description", content: "Learn letters A–Z in English and Hindi with interactive sounds and pictures." },
     ],
   }),
   component: ABC,
 });
 
-const ENGLISH_LETTERS: { letter: string; word: string; wordEn: string; emoji: string; gradient: string }[] = [
-  { letter: "A", word: "Apple", wordEn: "Apple", emoji: "🍎", gradient: "bg-gradient-abc" },
-  { letter: "B", word: "Ball", wordEn: "Ball", emoji: "⚽", gradient: "bg-gradient-numbers" },
-  { letter: "C", word: "Cat", wordEn: "Cat", emoji: "🐱", gradient: "bg-gradient-shapes" },
-  { letter: "D", word: "Dog", wordEn: "Dog", emoji: "🐶", gradient: "bg-gradient-tracing" },
-  { letter: "E", word: "Elephant", wordEn: "Elephant", emoji: "🐘", gradient: "bg-gradient-colors" },
-  { letter: "F", word: "Fish", wordEn: "Fish", emoji: "🐟", gradient: "bg-gradient-animals" },
-  { letter: "G", word: "Grapes", wordEn: "Grapes", emoji: "🍇", gradient: "bg-gradient-abc" },
-  { letter: "H", word: "Hat", wordEn: "Hat", emoji: "🎩", gradient: "bg-gradient-numbers" },
-  { letter: "I", word: "Ice cream", wordEn: "Ice cream", emoji: "🍦", gradient: "bg-gradient-shapes" },
-  { letter: "J", word: "Juice", wordEn: "Juice", emoji: "🧃", gradient: "bg-gradient-tracing" },
-  { letter: "K", word: "Kite", wordEn: "Kite", emoji: "🪁", gradient: "bg-gradient-colors" },
-  { letter: "L", word: "Lion", wordEn: "Lion", emoji: "🦁", gradient: "bg-gradient-animals" },
-  { letter: "M", word: "Moon", wordEn: "Moon", emoji: "🌙", gradient: "bg-gradient-abc" },
-  { letter: "N", word: "Nest", wordEn: "Nest", emoji: "🪺", gradient: "bg-gradient-numbers" },
-  { letter: "O", word: "Orange", wordEn: "Orange", emoji: "🍊", gradient: "bg-gradient-shapes" },
-  { letter: "P", word: "Panda", wordEn: "Panda", emoji: "🐼", gradient: "bg-gradient-tracing" },
-  { letter: "Q", word: "Queen", wordEn: "Queen", emoji: "👑", gradient: "bg-gradient-colors" },
-  { letter: "R", word: "Rainbow", wordEn: "Rainbow", emoji: "🌈", gradient: "bg-gradient-animals" },
-  { letter: "S", word: "Sun", wordEn: "Sun", emoji: "☀️", gradient: "bg-gradient-abc" },
-  { letter: "T", word: "Tree", wordEn: "Tree", emoji: "🌳", gradient: "bg-gradient-numbers" },
-  { letter: "U", word: "Umbrella", wordEn: "Umbrella", emoji: "☂️", gradient: "bg-gradient-shapes" },
-  { letter: "V", word: "Van", wordEn: "Van", emoji: "🚐", gradient: "bg-gradient-tracing" },
-  { letter: "W", word: "Whale", wordEn: "Whale", emoji: "🐳", gradient: "bg-gradient-colors" },
-  { letter: "X", word: "Xylophone", wordEn: "Xylophone", emoji: "🎹", gradient: "bg-gradient-animals" },
-  { letter: "Y", word: "Yo-yo", wordEn: "Yo-yo", emoji: "🪀", gradient: "bg-gradient-abc" },
-  { letter: "Z", word: "Zebra", wordEn: "Zebra", emoji: "🦓", gradient: "bg-gradient-numbers" },
+const BILINGUAL_LETTERS: {
+  letter: string;
+  letterHi: string;
+  wordEn: string;
+  wordHi: string;
+  wordHiPhonetic: string;
+  emoji: string;
+  gradient: string;
+}[] = [
+  { letter: "A", letterHi: "ए", wordEn: "Apple", wordHi: "सेब", wordHiPhonetic: "एप्पल", emoji: "🍎", gradient: "bg-gradient-abc" },
+  { letter: "B", letterHi: "बी", wordEn: "Ball", wordHi: "गेंद", wordHiPhonetic: "बॉल", emoji: "⚽", gradient: "bg-gradient-numbers" },
+  { letter: "C", letterHi: "सी", wordEn: "Cat", wordHi: "बिल्ली", wordHiPhonetic: "कैट", emoji: "🐱", gradient: "bg-gradient-shapes" },
+  { letter: "D", letterHi: "डी", wordEn: "Dog", wordHi: "कुत्ता", wordHiPhonetic: "डॉग", emoji: "🐶", gradient: "bg-gradient-tracing" },
+  { letter: "E", letterHi: "ई", wordEn: "Elephant", wordHi: "हाथी", wordHiPhonetic: "एलीफेंट", emoji: "🐘", gradient: "bg-gradient-colors" },
+  { letter: "F", letterHi: "एफ", wordEn: "Fish", wordHi: "मछली", wordHiPhonetic: "फिश", emoji: "🐟", gradient: "bg-gradient-animals" },
+  { letter: "G", letterHi: "जी", wordEn: "Grapes", wordHi: "अंगूर", wordHiPhonetic: "ग्रेप्स", emoji: "🍇", gradient: "bg-gradient-abc" },
+  { letter: "H", letterHi: "एच", wordEn: "Hat", wordHi: "टोपी", wordHiPhonetic: "हैट", emoji: "🎩", gradient: "bg-gradient-numbers" },
+  { letter: "I", letterHi: "आई", wordEn: "Ice cream", wordHi: "कुल्फी", wordHiPhonetic: "आइसक्रीम", emoji: "🍦", gradient: "bg-gradient-shapes" },
+  { letter: "J", letterHi: "जे", wordEn: "Juice", wordHi: "रस", wordHiPhonetic: "जूस", emoji: "🧃", gradient: "bg-gradient-tracing" },
+  { letter: "K", letterHi: "के", wordEn: "Kite", wordHi: "पतंग", wordHiPhonetic: "काइट", emoji: "🪁", gradient: "bg-gradient-colors" },
+  { letter: "L", letterHi: "एल", wordEn: "Lion", wordHi: "शेर", wordHiPhonetic: "लायन", emoji: "🦁", gradient: "bg-gradient-animals" },
+  { letter: "M", letterHi: "एम", wordEn: "Moon", wordHi: "चाँद", wordHiPhonetic: "मून", emoji: "🌙", gradient: "bg-gradient-abc" },
+  { letter: "N", letterHi: "एन", wordEn: "Nest", wordHi: "घोंसला", wordHiPhonetic: "नेस्ट", emoji: "🪺", gradient: "bg-gradient-numbers" },
+  { letter: "O", letterHi: "ओ", wordEn: "Orange", wordHi: "संतरा", wordHiPhonetic: "ऑरेंज", emoji: "🍊", gradient: "bg-gradient-shapes" },
+  { letter: "P", letterHi: "पी", wordEn: "Panda", wordHi: "पांडा", wordHiPhonetic: "पांडा", emoji: "🐼", gradient: "bg-gradient-tracing" },
+  { letter: "Q", letterHi: "क्यू", wordEn: "Queen", wordHi: "रानी", wordHiPhonetic: "क्वीन", emoji: "👑", gradient: "bg-gradient-colors" },
+  { letter: "R", letterHi: "आर", wordEn: "Rainbow", wordHi: "इंद्रधनुष", wordHiPhonetic: "रेनबो", emoji: "🌈", gradient: "bg-gradient-animals" },
+  { letter: "S", letterHi: "एस", wordEn: "Sun", wordHi: "सूरज", wordHiPhonetic: "सन", emoji: "☀️", gradient: "bg-gradient-abc" },
+  { letter: "T", letterHi: "टी", wordEn: "Tree", wordHi: "पेड़", wordHiPhonetic: "ट्री", emoji: "🌳", gradient: "bg-gradient-numbers" },
+  { letter: "U", letterHi: "यू", wordEn: "Umbrella", wordHi: "छतरी", wordHiPhonetic: "अम्ब्रेला", emoji: "☂️", gradient: "bg-gradient-shapes" },
+  { letter: "V", letterHi: "वी", wordEn: "Van", wordHi: "गाड़ी", wordHiPhonetic: "वैन", emoji: "🚐", gradient: "bg-gradient-tracing" },
+  { letter: "W", letterHi: "डब्ल्यू", wordEn: "Whale", wordHi: "ह्वेल मछली", wordHiPhonetic: "ह्वेल", emoji: "🐳", gradient: "bg-gradient-colors" },
+  { letter: "X", letterHi: "एक्स", wordEn: "Xylophone", wordHi: "जलतरंग", wordHiPhonetic: "जाइलोफोन", emoji: "🎹", gradient: "bg-gradient-animals" },
+  { letter: "Y", letterHi: "वाई", wordEn: "Yo-yo", wordHi: "यो-यो", wordHiPhonetic: "यो-यो", emoji: "🪀", gradient: "bg-gradient-abc" },
+  { letter: "Z", letterHi: "जेड", wordEn: "Zebra", wordHi: "जेब्रा", wordHiPhonetic: "जेब्रा", emoji: "🦓", gradient: "bg-gradient-numbers" },
 ];
 
 function ABC() {
   const lang = useLang();
-  const LETTERS = lang === "hi" ? HINDI_LETTERS : ENGLISH_LETTERS;
+  const LETTERS = BILINGUAL_LETTERS;
   const [idx, setIdx] = useState(0);
   const [burst, setBurst] = useState(0);
   const safeIdx = idx % LETTERS.length;
@@ -61,16 +69,27 @@ function ABC() {
 
   useEffect(() => {
     haptic(); pop();
-    const t = setTimeout(() => speak(`${item.letter}. ${item.word}.`), 150);
+    const t = setTimeout(() => {
+      if (lang === "hi") {
+        // Hindi mode: "ए... ए से एप्पल... एप्पल यानी सेब!"
+        speak(`${item.letterHi}... ${item.letterHi} से ${item.wordHiPhonetic}... ${item.wordHiPhonetic} यानी ${item.wordHi}!`);
+      } else {
+        // English mode: "A... A for Apple... Apple means Seb!"
+        speak(`${item.letter}... ${item.letter} for ${item.wordEn}... ${item.wordEn} means ${item.wordHi}!`);
+      }
+    }, 150);
     return () => clearTimeout(t);
-  }, [item.letter, item.word, lang]);
+  }, [item.letter, item.wordEn, lang]);
 
   function handleTap() {
     haptic(20); chime();
     setBurst((b) => b + 1);
     markLetter(item.letter);
-    if (lang === "hi") speak(`${item.letter} से ${item.word}`);
-    else speak(`${item.letter} is for ${item.word}!`);
+    if (lang === "hi") {
+      speak(`${item.letterHi} फॉर ${item.wordHiPhonetic}! ${item.wordHiPhonetic} यानी ${item.wordHi}!`);
+    } else {
+      speak(`${item.letter} for ${item.wordEn}! ${item.wordEn} means ${item.wordHi}!`);
+    }
   }
 
   return (
@@ -93,7 +112,7 @@ function ABC() {
         <button
           type="button"
           onClick={handleTap}
-          aria-label={`${item.letter} for ${item.word}`}
+          aria-label={`${item.letter} for ${item.wordEn}`}
           key={`${lang}-${item.letter}`}
           className="relative bg-white rounded-[48px] size-64 sm:size-80 flex items-center justify-center shadow-pop active:scale-95 transition-transform animate-pop-in"
         >
@@ -105,7 +124,9 @@ function ABC() {
         <div className="mt-8 flex items-center gap-4 bg-white/95 rounded-full pl-3 pr-6 py-3 shadow-pop animate-pop-in">
           <span className="text-5xl animate-wiggle">{item.emoji}</span>
           <div className="flex flex-col items-start leading-tight">
-            <span className="text-2xl font-extrabold">{item.word}</span>
+            <span className="text-2xl font-extrabold">
+              {lang === "hi" ? `${item.wordHiPhonetic} (${item.wordHi})` : item.wordEn}
+            </span>
             {lang === "hi" && <span className="text-xs font-bold text-muted-foreground">{item.wordEn}</span>}
           </div>
         </div>

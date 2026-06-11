@@ -17,15 +17,18 @@ if (typeof window !== "undefined" && "speechSynthesis" in window) {
   };
 }
 
-export function speak(text: string, opts: { rate?: number; pitch?: number; lang?: Lang } = {}) {
+export function speak(
+  text: string,
+  opts: { rate?: number; pitch?: number; lang?: Lang; onEnd?: () => void; onError?: () => void } = {}
+) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
   try {
     window.speechSynthesis.cancel();
     const lang = opts.lang ?? getLang();
     const ttsLang = speechLang[lang];
     const u = new SpeechSynthesisUtterance(text);
-    u.rate = opts.rate ?? (lang === "hi" ? 0.8 : 0.85);
-    u.pitch = opts.pitch ?? 1.3;
+    u.rate = opts.rate ?? (lang === "hi" ? 0.9 : 0.95);
+    u.pitch = opts.pitch ?? 1.25; // sweet, kid-friendly pitch level
     u.lang = ttsLang;
     const voices = getVoices();
     const preferred =
@@ -33,9 +36,13 @@ export function speak(text: string, opts: { rate?: number; pitch?: number; lang?
       ?? voices.find((v) => v.lang.toLowerCase().startsWith(ttsLang.toLowerCase().slice(0, 2)))
       ?? voices.find((v) => v.lang.startsWith(lang));
     if (preferred) u.voice = preferred;
+
+    if (opts.onEnd) u.onend = opts.onEnd;
+    if (opts.onError) u.onerror = opts.onError;
+
     window.speechSynthesis.speak(u);
   } catch {
-    /* no-op */
+    if (opts.onError) opts.onError();
   }
 }
 

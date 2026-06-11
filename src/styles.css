@@ -85,6 +85,7 @@
   --gradient-shapes: linear-gradient(135deg, oklch(0.88 0.17 95), oklch(0.82 0.18 50));
   --gradient-colors: linear-gradient(135deg, oklch(0.82 0.18 350), oklch(0.78 0.18 280));
   --gradient-animals: linear-gradient(135deg, oklch(0.85 0.16 160), oklch(0.82 0.14 95));
+  --gradient-rhymes: linear-gradient(135deg, oklch(0.75 0.16 300), oklch(0.78 0.19 350));
 }
 
 .dark {
@@ -124,6 +125,7 @@
   .bg-gradient-shapes { background-image: var(--gradient-shapes); }
   .bg-gradient-colors { background-image: var(--gradient-colors); }
   .bg-gradient-animals { background-image: var(--gradient-animals); }
+  .bg-gradient-rhymes { background-image: var(--gradient-rhymes); }
   .shadow-pop { box-shadow: var(--shadow-pop); }
   .shadow-glow { box-shadow: var(--shadow-glow); }
 }
@@ -156,3 +158,16 @@
 .animate-pop-in { animation: pop-in 0.5s cubic-bezier(.34,1.56,.64,1) both; }
 .animate-sparkle { animation: sparkle 1.4s ease-in-out infinite; }
 .animate-bounce-big { animation: bounce-big 0.6s cubic-bezier(.34,1.56,.64,1); }
+
+@keyframes draw-svg-path {
+  0% { stroke-dashoffset: 320; }
+  75% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 0; }
+}
+.animate-draw-svg {
+  animation: draw-svg-path 3.2s ease-in-out infinite;
+}
+
+.font-hindi {
+  font-family: "Baloo 2", "Fredoka", system-ui, sans-serif;
+}
