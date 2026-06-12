@@ -16,103 +16,95 @@ export const Route = createFileRoute("/tracing")({
 });
 
 const EN_ITEMS = ["A", "B", "C", "1", "2", "3", "O", "L", "S"];
-const HI_ITEMS = ["अ", "आ", "इ", "उ", "ए", "ओ", "क", "ख", "ग"];
+const HI_ITEMS = [
+  "अ","आ","इ","ई","उ","ऊ","ए","ऐ","ओ","औ",
+  "क","ख","ग","घ","च","छ","ज","झ",
+  "ट","ठ","ड","ढ","ण","त","थ","द","ध","न",
+  "प","फ","ब","भ","म","य","र","ल","व",
+  "श","ष","स","ह","क्ष","त्र","ज्ञ",
+];
 
-// Each path is a SINGLE continuous stroke (no separate M subpaths)
-// so animateMotion works correctly. Paths approximate the main strokes of each letter.
-const CHARACTER_PATHS: Record<string, string> = {
-  // English – clean continuous strokes
-  A: "M 20,85 L 50,15 L 80,85 M 65,55 L 35,55",
-  B: "M 30,85 L 30,15 C 65,15 65,47 30,47 C 70,47 70,85 30,85",
-  C: "M 75,25 C 25,10 20,90 75,75",
-  "1": "M 38,28 L 50,15 L 50,85",
-  "2": "M 25,35 C 25,10 75,10 75,45 L 25,85 L 75,85",
-  "3": "M 25,20 C 68,12 68,47 35,47 C 72,47 72,88 25,80",
-  O: "M 50,15 C 20,15 20,85 50,85 C 80,85 80,15 50,15",
-  L: "M 35,15 L 35,85 L 70,85",
-  S: "M 70,25 C 45,10 22,35 50,50 C 78,65 55,90 30,75",
-
-  // Hindi — single continuous approximations of the main body strokes
-  // अ  (left arc + body + right bar + matra line)
-  "अ": "M 30,25 L 70,25 L 70,75 L 70,47 L 47,47 C 32,47 32,22 47,22 C 62,22 57,44 47,47 C 58,50 52,72 28,68",
-  // आ (अ + extra vertical bar)
-  "आ": "M 28,25 L 75,25 L 75,75 L 75,47 L 55,47 C 42,47 42,22 55,22 C 68,22 64,44 55,47 C 65,50 60,72 35,68 L 35,47",
-  // इ
-  "इ": "M 65,25 L 28,25 C 18,35 25,55 50,55 C 32,55 22,70 35,78",
-  // उ
-  "उ": "M 35,20 L 35,65 C 35,80 65,80 65,60 C 65,40 40,40 40,25",
-  // ए
-  "ए": "M 20,25 L 75,25 M 48,25 L 48,60 C 48,75 68,75 68,60",
-  // ओ
-  "ओ": "M 28,25 L 75,25 L 75,75 L 75,47 L 55,47 C 42,47 42,22 55,22 C 68,22 64,44 55,47 C 65,50 60,72 35,68 M 72,20 C 62,8 55,8 55,15",
-  // क
-  "क": "M 25,25 L 75,25 L 50,25 L 50,80 L 50,52 C 28,52 28,35 50,35 C 50,52 50,52 50,52 C 68,52 68,72 68,75",
-  // ख
-  "ख": "M 22,25 L 75,25 L 38,25 L 38,75 L 38,52 C 22,52 22,38 38,38 L 38,45 M 62,25 L 62,75 L 62,52 C 48,52 48,38 62,38",
-  // ग
-  "ग": "M 20,25 L 65,25 L 40,25 L 40,65 C 40,78 22,78 22,65 C 22,52 40,52 40,65 M 62,25 L 62,78",
-};
-
-function samplePathPoints(pathString: string, count = 60): { x: number; y: number }[] {
-  if (typeof document === "undefined") return [];
-  try {
-    const pathEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    pathEl.setAttribute("d", pathString);
-    const totalLength = pathEl.getTotalLength();
-    const points = [];
-    for (let i = 0; i <= count; i++) {
-      const length = (i / count) * totalLength;
-      const pt = pathEl.getPointAtLength(length);
-      points.push({ x: pt.x, y: pt.y });
-    }
-    return points;
-  } catch (err) {
-    console.error("Error sampling path points:", err);
-    return [];
-  }
-}
-
-// TracingDemo — clean preview of the target letter with a friendly pencil bouncing above.
-// Works equally well for English and Hindi (no clip/reveal hacks).
+// TracingDemo — a small SVG that actually "writes" the letter:
+// the stroke draws itself via stroke-dashoffset, with a pen ✏️ that follows the build-up.
+// Works for any English or Hindi character (no per-letter path data needed).
 function TracingDemo({ item }: { item: string }) {
   const isHindi = /[\u0900-\u097F]/.test(item);
   const fontFamily = isHindi ? "'Baloo 2', system-ui, sans-serif" : "'Fredoka', system-ui, sans-serif";
-  const fontSize = isHindi ? 48 : 54;
+  const fontSize = isHindi ? 58 : 66;
+  // Key restarts the SVG animation when the letter changes
+  const k = item;
 
   return (
     <div
-      className="relative bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-purple-200 rounded-2xl overflow-hidden shadow-pop animate-pop-in flex items-center justify-center"
-      style={{ width: 84, height: 84, flexShrink: 0 }}
+      className="relative bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-purple-200 rounded-2xl overflow-hidden shadow-pop flex items-center justify-center"
+      style={{ width: 92, height: 92, flexShrink: 0 }}
     >
-      {/* Faint notebook lines */}
+      {/* Notebook ruling */}
       <div className="absolute inset-0 opacity-30" style={{
         backgroundImage: "repeating-linear-gradient(0deg, transparent 0 18px, rgba(139,92,246,0.25) 18px 19px)"
       }} />
 
-      {/* Colorful letter */}
-      <span
-        className="relative select-none leading-none animate-pop-in"
-        aria-hidden
-        style={{
-          fontFamily,
-          fontWeight: 800,
-          fontSize,
-          background: "linear-gradient(160deg, #ff7ab6 0%, #ffbe3b 55%, #4d9dff 100%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-        }}
-      >
-        {item}
-      </span>
+      <svg key={k} viewBox="0 0 100 100" width="92" height="92" className="absolute inset-0">
+        <defs>
+          <linearGradient id="penInk" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#ff7ab6" />
+            <stop offset="55%" stopColor="#ffbe3b" />
+            <stop offset="100%" stopColor="#4d9dff" />
+          </linearGradient>
+        </defs>
 
-      {/* Pencil bouncing on top-right */}
-      <span
-        className="absolute top-1 right-1 text-lg animate-bounce"
-        aria-hidden
-        style={{ animationDuration: "1.2s" }}
-      >
-        ✏️
-      </span>
+        {/* Faint guide letter (the "ghost" to trace over) */}
+        <text
+          x="50" y="50"
+          textAnchor="middle" dominantBaseline="central"
+          fontFamily={fontFamily} fontWeight={800} fontSize={fontSize}
+          fill="rgba(148,163,184,0.30)"
+        >
+          {item}
+        </text>
+
+        {/* Self-drawing letter — stroke-only, animated via stroke-dashoffset */}
+        <text
+          x="50" y="50"
+          textAnchor="middle" dominantBaseline="central"
+          fontFamily={fontFamily} fontWeight={800} fontSize={fontSize}
+          fill="none"
+          stroke="url(#penInk)"
+          strokeWidth={2.2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{
+            strokeDasharray: 600,
+            strokeDashoffset: 600,
+            animation: "tg-draw 2.4s ease-in-out 0.15s infinite",
+          }}
+        >
+          {item}
+        </text>
+
+        {/* Pen that sweeps across as the letter is drawn */}
+        <g style={{ animation: "tg-pen 2.4s ease-in-out 0.15s infinite", transformOrigin: "50% 50%" }}>
+          <text x="0" y="0" fontSize="18" textAnchor="middle">✏️</text>
+        </g>
+      </svg>
+
+      {/* Local keyframes — scoped to this component */}
+      <style>{`
+        @keyframes tg-draw {
+          0%   { stroke-dashoffset: 600; opacity: 1; }
+          70%  { stroke-dashoffset: 0;   opacity: 1; }
+          90%  { stroke-dashoffset: 0;   opacity: 1; }
+          100% { stroke-dashoffset: 0;   opacity: 0; }
+        }
+        @keyframes tg-pen {
+          0%   { transform: translate(28px, 26px) rotate(-12deg); }
+          25%  { transform: translate(50px, 18px) rotate(8deg); }
+          50%  { transform: translate(72px, 40px) rotate(14deg); }
+          70%  { transform: translate(58px, 72px) rotate(-6deg); }
+          90%  { transform: translate(40px, 60px) rotate(0deg); opacity: 1; }
+          100% { transform: translate(40px, 60px) rotate(0deg); opacity: 0; }
+        }
+      `}</style>
     </div>
   );
 }
