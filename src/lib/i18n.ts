@@ -123,33 +123,67 @@ export const ANIMALS_DATA: { id: string; en: string; hi: string; emoji: string; 
   { id: "monkey", en: "Monkey", hi: "बंदर", emoji: "🐵", soundEn: "Oo oo aa aa!", soundHi: "हू हू!" },
 ];
 
-// Hindi vowels & key consonants (Varnamala) for the bilingual ABC mode
-export const HINDI_LETTERS: { letter: string; word: string; wordEn: string; emoji: string; gradient: string }[] = [
-  { letter: "अ", word: "अनार", wordEn: "Pomegranate", emoji: "🍎", gradient: "bg-gradient-abc" },
-  { letter: "आ", word: "आम", wordEn: "Mango", emoji: "🥭", gradient: "bg-gradient-numbers" },
-  { letter: "इ", word: "इमली", wordEn: "Tamarind", emoji: "🌿", gradient: "bg-gradient-shapes" },
-  { letter: "उ", word: "उल्लू", wordEn: "Owl", emoji: "🦉", gradient: "bg-gradient-tracing" },
-  { letter: "ए", word: "एड़ी", wordEn: "Heel", emoji: "🦶", gradient: "bg-gradient-colors" },
-  { letter: "ओ", word: "ओखली", wordEn: "Mortar", emoji: "🥣", gradient: "bg-gradient-animals" },
-  { letter: "क", word: "कमल", wordEn: "Lotus", emoji: "🪷", gradient: "bg-gradient-abc" },
-  { letter: "ख", word: "खरगोश", wordEn: "Rabbit", emoji: "🐰", gradient: "bg-gradient-numbers" },
-  { letter: "ग", word: "गाय", wordEn: "Cow", emoji: "🐮", gradient: "bg-gradient-shapes" },
-  { letter: "घ", word: "घर", wordEn: "House", emoji: "🏠", gradient: "bg-gradient-tracing" },
-  { letter: "च", word: "चम्मच", wordEn: "Spoon", emoji: "🥄", gradient: "bg-gradient-colors" },
-  { letter: "छ", word: "छतरी", wordEn: "Umbrella", emoji: "☂️", gradient: "bg-gradient-animals" },
-  { letter: "ज", word: "जहाज", wordEn: "Ship", emoji: "🚢", gradient: "bg-gradient-abc" },
-  { letter: "त", word: "तितली", wordEn: "Butterfly", emoji: "🦋", gradient: "bg-gradient-numbers" },
-  { letter: "द", word: "दीपक", wordEn: "Lamp", emoji: "🪔", gradient: "bg-gradient-shapes" },
-  { letter: "न", word: "नाव", wordEn: "Boat", emoji: "⛵", gradient: "bg-gradient-tracing" },
-  { letter: "प", word: "पतंग", wordEn: "Kite", emoji: "🪁", gradient: "bg-gradient-colors" },
-  { letter: "फ", word: "फूल", wordEn: "Flower", emoji: "🌸", gradient: "bg-gradient-animals" },
-  { letter: "ब", word: "बकरी", wordEn: "Goat", emoji: "🐐", gradient: "bg-gradient-abc" },
-  { letter: "म", word: "मछली", wordEn: "Fish", emoji: "🐟", gradient: "bg-gradient-numbers" },
-  { letter: "य", word: "यज्ञ", wordEn: "Yajna", emoji: "🔥", gradient: "bg-gradient-shapes" },
-  { letter: "र", word: "रथ", wordEn: "Chariot", emoji: "🛺", gradient: "bg-gradient-tracing" },
-  { letter: "ल", word: "लड्डू", wordEn: "Laddu", emoji: "🟡", gradient: "bg-gradient-colors" },
-  { letter: "व", word: "वन", wordEn: "Forest", emoji: "🌳", gradient: "bg-gradient-animals" },
-  { letter: "श", word: "शेर", wordEn: "Lion", emoji: "🦁", gradient: "bg-gradient-abc" },
-  { letter: "स", word: "सूरज", wordEn: "Sun", emoji: "☀️", gradient: "bg-gradient-numbers" },
-  { letter: "ह", word: "हाथी", wordEn: "Elephant", emoji: "🐘", gradient: "bg-gradient-shapes" },
+// Hindi Varnamala — full set (vowels, consonants & sanyukt akshar) for the bilingual ABC mode
+const G = ["bg-gradient-abc", "bg-gradient-numbers", "bg-gradient-shapes", "bg-gradient-tracing", "bg-gradient-colors", "bg-gradient-animals"];
+const HINDI_RAW: { letter: string; word: string; wordEn: string; emoji: string }[] = [
+  // Vowels (स्वर)
+  { letter: "अ", word: "अनार", wordEn: "Pomegranate", emoji: "🍎" },
+  { letter: "आ", word: "आम", wordEn: "Mango", emoji: "🥭" },
+  { letter: "इ", word: "इमली", wordEn: "Tamarind", emoji: "🌿" },
+  { letter: "ई", word: "ईख", wordEn: "Sugarcane", emoji: "🎋" },
+  { letter: "उ", word: "उल्लू", wordEn: "Owl", emoji: "🦉" },
+  { letter: "ऊ", word: "ऊन", wordEn: "Wool", emoji: "🧶" },
+  { letter: "ऋ", word: "ऋषि", wordEn: "Sage", emoji: "🧘" },
+  { letter: "ए", word: "एड़ी", wordEn: "Heel", emoji: "🦶" },
+  { letter: "ऐ", word: "ऐनक", wordEn: "Glasses", emoji: "👓" },
+  { letter: "ओ", word: "ओखली", wordEn: "Mortar", emoji: "🥣" },
+  { letter: "औ", word: "औरत", wordEn: "Woman", emoji: "👩" },
+  { letter: "अं", word: "अंगूर", wordEn: "Grapes", emoji: "🍇" },
+  { letter: "अः", word: "प्रातः", wordEn: "Morning", emoji: "🌅" },
+  { letter: "अँ", word: "अँगूठी", wordEn: "Ring", emoji: "💍" },
+  // क वर्ग
+  { letter: "क", word: "कमल", wordEn: "Lotus", emoji: "🪷" },
+  { letter: "ख", word: "खरगोश", wordEn: "Rabbit", emoji: "🐰" },
+  { letter: "ग", word: "गाय", wordEn: "Cow", emoji: "🐮" },
+  { letter: "घ", word: "घर", wordEn: "House", emoji: "🏠" },
+  { letter: "ङ", word: "वाङ्मय", wordEn: "Literature", emoji: "📚" },
+  // च वर्ग
+  { letter: "च", word: "चम्मच", wordEn: "Spoon", emoji: "🥄" },
+  { letter: "छ", word: "छतरी", wordEn: "Umbrella", emoji: "☂️" },
+  { letter: "ज", word: "जहाज", wordEn: "Ship", emoji: "🚢" },
+  { letter: "झ", word: "झंडा", wordEn: "Flag", emoji: "🚩" },
+  { letter: "ञ", word: "ज्ञान", wordEn: "Knowledge", emoji: "🧠" },
+  // ट वर्ग
+  { letter: "ट", word: "टमाटर", wordEn: "Tomato", emoji: "🍅" },
+  { letter: "ठ", word: "ठेला", wordEn: "Cart", emoji: "🛒" },
+  { letter: "ड", word: "डमरू", wordEn: "Drum", emoji: "🥁" },
+  { letter: "ढ", word: "ढोल", wordEn: "Dhol", emoji: "🪘" },
+  { letter: "ण", word: "बाण", wordEn: "Arrow", emoji: "🏹" },
+  // त वर्ग
+  { letter: "त", word: "तितली", wordEn: "Butterfly", emoji: "🦋" },
+  { letter: "थ", word: "थाली", wordEn: "Plate", emoji: "🍽️" },
+  { letter: "द", word: "दीपक", wordEn: "Lamp", emoji: "🪔" },
+  { letter: "ध", word: "धनुष", wordEn: "Bow", emoji: "🏹" },
+  { letter: "न", word: "नाव", wordEn: "Boat", emoji: "⛵" },
+  // प वर्ग
+  { letter: "प", word: "पतंग", wordEn: "Kite", emoji: "🪁" },
+  { letter: "फ", word: "फूल", wordEn: "Flower", emoji: "🌸" },
+  { letter: "ब", word: "बकरी", wordEn: "Goat", emoji: "🐐" },
+  { letter: "भ", word: "भालू", wordEn: "Bear", emoji: "🐻" },
+  { letter: "म", word: "मछली", wordEn: "Fish", emoji: "🐟" },
+  // अंतस्थ
+  { letter: "य", word: "यज्ञ", wordEn: "Yajna", emoji: "🔥" },
+  { letter: "र", word: "रथ", wordEn: "Chariot", emoji: "🛺" },
+  { letter: "ल", word: "लड्डू", wordEn: "Laddu", emoji: "🟡" },
+  { letter: "व", word: "वन", wordEn: "Forest", emoji: "🌳" },
+  // ऊष्म
+  { letter: "श", word: "शेर", wordEn: "Lion", emoji: "🦁" },
+  { letter: "ष", word: "षट्कोण", wordEn: "Hexagon", emoji: "⬡" },
+  { letter: "स", word: "सूरज", wordEn: "Sun", emoji: "☀️" },
+  { letter: "ह", word: "हाथी", wordEn: "Elephant", emoji: "🐘" },
+  // संयुक्त
+  { letter: "क्ष", word: "क्षत्रिय", wordEn: "Warrior", emoji: "🛡️" },
+  { letter: "त्र", word: "त्रिशूल", wordEn: "Trident", emoji: "🔱" },
+  { letter: "ज्ञ", word: "ज्ञानी", wordEn: "Wise", emoji: "🦉" },
 ];
+export const HINDI_LETTERS = HINDI_RAW.map((x, i) => ({ ...x, gradient: G[i % G.length] }));
