@@ -120,15 +120,7 @@ function Tracing() {
   const drawingRef = useRef(false);
   const lastRef = useRef<{ x: number; y: number } | null>(null);
 
-  const targetPoints = useMemo(() => {
-    const pStr = CHARACTER_PATHS[item];
-    if (!pStr) return [];
-    return samplePathPoints(pStr, 60);
-  }, [item]);
-
-  const hitsRef = useRef<boolean[]>([]);
   const totalUserPointsRef = useRef(0);
-  const offPathPointsRef = useRef(0);
 
   // Reset index when language switches (avoid stale slot)
   useEffect(() => { setIdx(0); }, [lang]);
@@ -152,7 +144,6 @@ function Tracing() {
       ctx.scale(dpr, dpr);
       drawGuide(ctx, rect.width, rect.height, item);
 
-      // Redraw once fonts are loaded (avoids system-font fallback on first paint)
       if (typeof document !== "undefined" && "fonts" in document) {
         document.fonts.ready.then(() => {
           const ctx2 = c!.getContext("2d");
@@ -164,7 +155,6 @@ function Tracing() {
 
     rafId = requestAnimationFrame(init);
 
-    // Redraw on resize / orientation change
     const ro = new ResizeObserver(() => {
       const ctx = c.getContext("2d");
       const r = c.getBoundingClientRect();
@@ -178,10 +168,7 @@ function Tracing() {
     });
     ro.observe(c);
 
-    // Reset validation tracking refs
-    hitsRef.current = new Array(targetPoints.length).fill(false);
     totalUserPointsRef.current = 0;
-    offPathPointsRef.current = 0;
     setCelebrate(false);
 
     const isNumber = /[0-9०-९१२३४५६७८९]/.test(item);
@@ -192,7 +179,7 @@ function Tracing() {
       cancelAnimationFrame(rafId);
       ro.disconnect();
     };
-  }, [item, lang, targetPoints]);
+  }, [item, lang]);
 
 
   function drawGuide(ctx: CanvasRenderingContext2D, w: number, h: number, ch: string) {
