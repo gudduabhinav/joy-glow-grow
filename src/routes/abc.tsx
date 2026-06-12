@@ -125,7 +125,7 @@ function ABC() {
         <div className="rounded-full bg-white/90 px-4 py-2 shadow-pop text-sm font-extrabold">{safeIdx + 1} / {LETTERS.length}</div>
       </header>
 
-      <section className="flex-1 flex flex-col items-center justify-center px-6 relative">
+      <section className="flex-1 flex flex-col items-center justify-center px-5 relative w-full max-w-md mx-auto">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           {particles.map((p) => (
             <span key={p.id} className="absolute text-3xl" style={{ animation: "pop-in 0.7s cubic-bezier(.34,1.56,.64,1) both", transform: `translate(${p.x}px, ${p.y}px)` }}>
@@ -139,22 +139,27 @@ function ABC() {
           onClick={handleTap}
           aria-label={`${item.letter} for ${item.wordEn}`}
           key={`${lang}-${item.letter}`}
-          className="relative bg-white rounded-[48px] size-64 sm:size-80 flex items-center justify-center shadow-pop active:scale-95 transition-transform animate-pop-in"
+          className="relative w-full bg-white rounded-[48px] flex flex-col items-center justify-center shadow-pop active:scale-[0.98] transition-transform animate-pop-in p-8 sm:p-10"
         >
-          <span className={`${item.isHindi ? "font-hindi text-[10rem] sm:text-[14rem]" : "text-[12rem] sm:text-[16rem]"} font-black leading-none bg-gradient-hero bg-clip-text text-transparent`}>
+          {/* Top part: Huge Letter */}
+          <span className={`${item.isHindi ? "font-hindi text-[8rem] sm:text-[10rem]" : "text-[9rem] sm:text-[12rem]"} font-black leading-none bg-gradient-hero bg-clip-text text-transparent`}>
             {item.letter}
           </span>
-        </button>
-
-        <div className="mt-8 flex items-center gap-4 bg-white/95 rounded-full pl-3 pr-6 py-3 shadow-pop animate-pop-in">
-          <span className="text-5xl animate-wiggle">{item.emoji}</span>
-          <div className="flex flex-col items-start leading-tight">
-            <span className={`text-2xl font-extrabold ${item.isHindi ? "font-hindi" : ""}`}>
-              {lang === "hi" ? item.wordHi : item.wordEn}
-            </span>
-            {lang === "hi" && <span className="text-xs font-bold text-muted-foreground">{item.wordEn}</span>}
+          
+          {/* Divider */}
+          <div className="w-full h-1 bg-slate-100 rounded-full my-6 opacity-60" />
+          
+          {/* Bottom part: Huge Emoji & Word */}
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-[5rem] sm:text-[6rem] animate-wiggle leading-none">{item.emoji}</span>
+            <div className="flex flex-col items-center text-center leading-tight mt-2">
+              <span className={`text-4xl sm:text-5xl font-extrabold text-slate-800 ${item.isHindi ? "font-hindi" : ""}`}>
+                {lang === "hi" ? item.wordHi : item.wordEn}
+              </span>
+              {lang === "hi" && <span className="text-xl font-bold text-slate-400 mt-1">{item.wordEn}</span>}
+            </div>
           </div>
-        </div>
+        </button>
       </section>
 
       <nav className="flex items-center justify-between px-6 pb-8 pt-4">

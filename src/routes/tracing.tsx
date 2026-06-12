@@ -24,27 +24,20 @@ const HI_ITEMS = [
   "श","ष","स","ह","क्ष","त्र","ज्ञ",
 ];
 
-// TracingDemo — a small SVG that actually "writes" the letter:
-// the stroke draws itself via stroke-dashoffset, with a pen ✏️ that follows the build-up.
-// Works for any English or Hindi character (no per-letter path data needed).
+// TracingDemo — A slow, animated trace of the letter's outline to show its shape.
 function TracingDemo({ item }: { item: string }) {
   const isHindi = /[\u0900-\u097F]/.test(item);
   const fontFamily = isHindi ? "'Baloo 2', system-ui, sans-serif" : "'Fredoka', system-ui, sans-serif";
   const fontSize = isHindi ? 58 : 66;
-  // Key restarts the SVG animation when the letter changes
-  const k = item;
 
   return (
     <div
       className="relative bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-purple-200 rounded-2xl overflow-hidden shadow-pop flex items-center justify-center"
       style={{ width: 92, height: 92, flexShrink: 0 }}
     >
-      {/* Notebook ruling */}
-      <div className="absolute inset-0 opacity-30" style={{
-        backgroundImage: "repeating-linear-gradient(0deg, transparent 0 18px, rgba(139,92,246,0.25) 18px 19px)"
-      }} />
+      <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent 0 18px, rgba(139,92,246,0.25) 18px 19px)" }} />
 
-      <svg key={k} viewBox="0 0 100 100" width="92" height="92" className="absolute inset-0">
+      <svg key={item} viewBox="0 0 100 100" width="92" height="92" className="absolute inset-0">
         <defs>
           <linearGradient id="penInk" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#ff7ab6" />
@@ -121,6 +114,12 @@ function Tracing() {
   const lastRef = useRef<{ x: number; y: number } | null>(null);
 
   const totalUserPointsRef = useRef(0);
+  const offPathPointsRef = useRef(0);
+
+  // Grid Coverage Tracking for Validation
+  const targetCellsRef = useRef<Set<string>>(new Set());
+  const hitCellsRef = useRef<Set<string>>(new Set());
+  const cellSize = 12; // size of grid cells
 
   // Reset index when language switches (avoid stale slot)
   useEffect(() => { setIdx(0); }, [lang]);
@@ -139,16 +138,20 @@ function Tracing() {
       }
       c!.width = Math.round(rect.width * dpr);
       c!.height = Math.round(rect.height * dpr);
-      const ctx = c!.getContext("2d");
+      const ctx = c!.getContext("2d", { willReadFrequently: true });
       if (!ctx) return;
       ctx.scale(dpr, dpr);
       drawGuide(ctx, rect.width, rect.height, item);
+      buildTargetGrid(ctx, rect.width, rect.height, item);
 
       if (typeof document !== "undefined" && "fonts" in document) {
         document.fonts.ready.then(() => {
-          const ctx2 = c!.getContext("2d");
+          const ctx2 = c!.getContext("2d", { willReadFrequently: true });
           const r2 = c!.getBoundingClientRect();
-          if (ctx2 && r2.width > 1) drawGuide(ctx2, r2.width, r2.height, item);
+          if (ctx2 && r2.width > 1) {
+            drawGuide(ctx2, r2.width, r2.height, item);
+            buildTargetGrid(ctx2, r2.width, r2.height, item);
+          }
         });
       }
     }
@@ -168,7 +171,11 @@ function Tracing() {
     });
     ro.observe(c);
 
+    ro.observe(c);
+
+    hitCellsRef.current.clear();
     totalUserPointsRef.current = 0;
+    offPathPointsRef.current = 0;
     setCelebrate(false);
 
     const isNumber = /[0-9०-९१२३४५६७८९]/.test(item);
@@ -211,6 +218,39 @@ function Tracing() {
     ctx.setLineDash([]);
   }
 
+  function buildTargetGrid(ctx: CanvasRenderingContext2D, w: number, h: number, ch: string) {
+    // Render the character to an offscreen canvas to map its pixels
+    const off = document.createElement("canvas");
+    off.width = w; off.height = h;
+    const octx = off.getContext("2d", { willReadFrequently: true });
+    if (!octx) return;
+
+    const isHindi = /[\u0900-\u097F]/.test(ch);
+    const fontSize = Math.min(w, h) * 0.45;
+    octx.font = `800 ${fontSize}px ${isHindi ? "'Baloo 2'" : "Fredoka"}, system-ui, sans-serif`;
+    octx.textAlign = "center";
+    octx.textBaseline = "middle";
+    const cy = h / 2 + (isHindi ? -fontSize * 0.05 : fontSize * 0.04);
+
+    octx.fillStyle = "#000";
+    octx.fillText(ch, w / 2, cy);
+
+    const imgData = octx.getImageData(0, 0, w, h).data;
+    const targets = new Set<string>();
+
+    for (let y = 0; y < h; y += cellSize / 2) {
+      for (let x = 0; x < w; x += cellSize / 2) {
+        const i = (Math.floor(y) * Math.floor(w) + Math.floor(x)) * 4;
+        if (imgData[i + 3] > 50) { // If alpha > 50 (pixel is drawn)
+          const gx = Math.floor(x / cellSize);
+          const gy = Math.floor(y / cellSize);
+          targets.add(`${gx},${gy}`);
+        }
+      }
+    }
+    targetCellsRef.current = targets;
+  }
+
   function pos(e: React.PointerEvent<HTMLCanvasElement>) {
     const c = canvasRef.current!;
     const r = c.getBoundingClientRect();
@@ -244,6 +284,26 @@ function Tracing() {
     ctx.stroke();
     lastRef.current = p;
     totalUserPointsRef.current += 1;
+
+    // Validation Check: Update grid hits
+    const gx = Math.floor(p.x / cellSize);
+    const gy = Math.floor(p.y / cellSize);
+    const cellKey = `${gx},${gy}`;
+    
+    // Allow a 1-cell radius for sloppiness (toddlers aren't precise)
+    let isHit = false;
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        if (targetCellsRef.current.has(`${gx + dx},${gy + dy}`)) {
+          isHit = true;
+          hitCellsRef.current.add(`${gx + dx},${gy + dy}`);
+        }
+      }
+    }
+    
+    if (!isHit) {
+      offPathPointsRef.current += 1;
+    }
   }
 
   function end() {
@@ -252,8 +312,16 @@ function Tracing() {
     lastRef.current = null;
     pop();
 
-    // Simple, toddler-friendly completion: celebrate once the child has drawn enough.
-    if (totalUserPointsRef.current >= 60 && !celebrate) {
+    const targets = targetCellsRef.current.size;
+    const hits = hitCellsRef.current.size;
+    
+    if (targets === 0) return; // safety
+
+    const coverage = hits / targets;
+    const scribbleRatio = offPathPointsRef.current / Math.max(1, totalUserPointsRef.current);
+
+    // strict completion: must cover 80% of the letter, and can't just be wild scribbling all over the screen.
+    if (coverage >= 0.80 && scribbleRatio < 0.35 && !celebrate) {
       setCelebrate(true);
       chime();
       haptic(40);
@@ -271,7 +339,9 @@ function Tracing() {
     if (!ctx) return;
     const r = c.getBoundingClientRect();
     drawGuide(ctx, r.width, r.height, item);
+    hitCellsRef.current.clear();
     totalUserPointsRef.current = 0;
+    offPathPointsRef.current = 0;
     setCelebrate(false);
   }
 

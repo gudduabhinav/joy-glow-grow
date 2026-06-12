@@ -184,6 +184,6 @@ const HINDI_RAW: { letter: string; word: string; wordEn: string; emoji: string }
   // संयुक्त
   { letter: "क्ष", word: "क्षत्रिय", wordEn: "Warrior", emoji: "🛡️" },
   { letter: "त्र", word: "त्रिशूल", wordEn: "Trident", emoji: "🔱" },
-  { letter: "ज्ञ", word: "ज्ञानी", wordEn: "Wise", emoji: "🦉" },
+  { letter: "ज्ञ", word: "ज्ञानी", wordEn: "Wise", emoji: "🧠" },
 ];
 export const HINDI_LETTERS = HINDI_RAW.map((x, i) => ({ ...x, gradient: G[i % G.length] }));
