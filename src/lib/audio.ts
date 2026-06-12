@@ -17,6 +17,29 @@ if (typeof window !== "undefined" && "speechSynthesis" in window) {
   };
 }
 
+// Best-voice picker — prefer high-quality neural/Google/Microsoft voices, then any female voice.
+function pickBestVoice(ttsLang: string): SpeechSynthesisVoice | undefined {
+  const voices = getVoices();
+  const langPrefix = ttsLang.toLowerCase().slice(0, 2);
+  const match = voices.filter((v) => v.lang.toLowerCase().startsWith(langPrefix));
+  if (!match.length) return undefined;
+
+  // Priority list of known high-quality voice name patterns (most "melodious" first)
+  const priorities: RegExp[] = [
+    /google.*(हिन्दी|hindi|india|female)/i,
+    /microsoft.*(swara|kalpana|aria|jenny|libby|sonia|neerja|natural)/i,
+    /(neural|natural|premium|enhanced|wavenet)/i,
+    /google/i,
+    /(samantha|karen|tessa|moira|fiona|victoria|allison|ava)/i,
+    /female/i,
+  ];
+  for (const re of priorities) {
+    const v = match.find((x) => re.test(x.name));
+    if (v) return v;
+  }
+  return match[0];
+}
+
 export function speak(
   text: string,
   opts: { rate?: number; pitch?: number; lang?: Lang; onEnd?: () => void; onError?: () => void } = {}
@@ -27,14 +50,12 @@ export function speak(
     const lang = opts.lang ?? getLang();
     const ttsLang = speechLang[lang];
     const u = new SpeechSynthesisUtterance(text);
-    u.rate = opts.rate ?? (lang === "hi" ? 0.9 : 0.95);
-    u.pitch = opts.pitch ?? 1.25; // sweet, kid-friendly pitch level
+    // Slower & calmer for toddler clarity
+    u.rate = opts.rate ?? (lang === "hi" ? 0.82 : 0.88);
+    u.pitch = opts.pitch ?? 1.15; // gentle, melodious
+    u.volume = 1;
     u.lang = ttsLang;
-    const voices = getVoices();
-    const preferred =
-      voices.find((v) => v.lang.toLowerCase().startsWith(ttsLang.toLowerCase().slice(0, 2)) && /female|google|samantha|karen|child|kid/i.test(v.name))
-      ?? voices.find((v) => v.lang.toLowerCase().startsWith(ttsLang.toLowerCase().slice(0, 2)))
-      ?? voices.find((v) => v.lang.startsWith(lang));
+    const preferred = pickBestVoice(ttsLang);
     if (preferred) u.voice = preferred;
 
     if (opts.onEnd) u.onend = opts.onEnd;

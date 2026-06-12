@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { speak, pop, chime, haptic } from "@/lib/audio";
 import { markLetter } from "@/lib/progress";
-import { useLang } from "@/lib/i18n";
+import { useLang, HINDI_LETTERS } from "@/lib/i18n";
 import { LangToggle } from "@/components/LangToggle";
 
 export const Route = createFileRoute("/abc")({
