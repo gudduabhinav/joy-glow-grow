@@ -140,38 +140,70 @@ function Rhymes() {
   return (
     <main className="min-h-screen bg-gradient-rhymes flex flex-col select-none">
       {selected ? (
-        <div className={`fixed inset-0 z-50 ${selected.bgGradient} flex flex-col animate-pop-in`}>
+        <div className={`fixed inset-0 z-50 ${selected.bgGradient} flex flex-col animate-pop-in overflow-hidden`}>
+          {/* Floating emoji decorations */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            {selected.floatingEmojis.map((e, i) => (
+              <span
+                key={i}
+                className="absolute text-4xl opacity-40 animate-bounce"
+                style={{
+                  left: `${(i * 23 + 8) % 90}%`,
+                  top: `${(i * 31 + 12) % 80}%`,
+                  animationDelay: `${i * 0.4}s`,
+                  animationDuration: `${2 + (i % 3)}s`,
+                }}
+              >
+                {e}
+              </span>
+            ))}
+          </div>
+
           {/* Compact header */}
-          <header className="flex items-center gap-3 px-4 pt-5 pb-3 flex-shrink-0">
+          <header className="relative z-10 flex items-center gap-3 px-4 pt-5 pb-3 flex-shrink-0">
             <button
               type="button"
               onClick={handleClose}
-              className="rounded-full bg-white/90 size-11 flex items-center justify-center shadow-pop text-xl active:scale-95 flex-shrink-0"
+              className="rounded-full bg-white/95 size-11 flex items-center justify-center shadow-pop text-xl active:scale-95 flex-shrink-0"
               aria-label="Back"
             >
               ⬅️
             </button>
-            <h1 className={`flex-1 text-lg font-extrabold text-white drop-shadow-sm leading-tight ${selected.lang === "hi" ? "font-hindi" : ""}`}>
+            <h1 className={`flex-1 text-lg font-extrabold text-white drop-shadow-md leading-tight ${selected.lang === "hi" ? "font-hindi" : ""}`}>
               {lang === "hi" ? selected.titleHi : selected.title}
             </h1>
           </header>
 
-          {/* Video fills all remaining height */}
-          <div className="flex-1 px-3 pb-3 flex flex-col min-h-0">
-            <div className="flex-1 relative rounded-3xl overflow-hidden bg-black shadow-pop min-h-0">
-              <iframe
-                key={selected.youtubeId}
-                src={`https://www.youtube.com/embed/${selected.youtubeId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&start=${selected.startSec}&end=${selected.endSec}`}
-                title={selected.title}
-                className="absolute inset-0 w-full h-full"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
+          {/* Video — fixed 16:9 frame inside a colorful, rounded "TV" so no black bars */}
+          <div className="relative z-10 flex-1 px-4 pb-4 flex flex-col items-center justify-center min-h-0">
+            <div
+              className="w-full max-w-md rounded-[32px] p-3 shadow-pop"
+              style={{
+                background: "linear-gradient(135deg, #ffd6f0, #ffe9b8, #bde4ff)",
+                border: "4px solid rgba(255,255,255,0.85)",
+              }}
+            >
+              <div className="relative w-full overflow-hidden rounded-[22px] bg-black/80" style={{ aspectRatio: "16 / 9" }}>
+                <iframe
+                  key={selected.youtubeId}
+                  src={`https://www.youtube.com/embed/${selected.youtubeId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&fs=1&start=${selected.startSec}&end=${selected.endSec}`}
+                  title={selected.title}
+                  className="absolute inset-0 w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+              {/* Decorative dots like a TV bezel */}
+              <div className="flex justify-center gap-1.5 mt-2">
+                <span className="size-2 rounded-full bg-pink-400"></span>
+                <span className="size-2 rounded-full bg-amber-400"></span>
+                <span className="size-2 rounded-full bg-sky-400"></span>
+              </div>
             </div>
 
-            {/* Compact info strip at bottom */}
-            <div className="mt-2 bg-white/90 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-pop flex-shrink-0">
+            {/* Info chip */}
+            <div className="mt-4 w-full max-w-md bg-white/95 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-pop">
               <span className="text-3xl">{selected.emoji}</span>
               <div className="flex-1 min-w-0">
                 <p className={`font-extrabold text-slate-800 text-sm leading-tight truncate ${selected.lang === "hi" ? "font-hindi" : ""}`}>

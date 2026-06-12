@@ -72,30 +72,26 @@ function samplePathPoints(pathString: string, count = 60): { x: number; y: numbe
   }
 }
 
-// TracingDemo — letter reveals from top-to-bottom (mimics real writing direction).
-// Ghost letter in background shows the full shape; colored letter animates in.
+// TracingDemo — clean preview of the target letter with a friendly pencil bouncing above.
+// Works equally well for English and Hindi (no clip/reveal hacks).
 function TracingDemo({ item }: { item: string }) {
   const isHindi = /[\u0900-\u097F]/.test(item);
   const fontFamily = isHindi ? "'Baloo 2', system-ui, sans-serif" : "'Fredoka', system-ui, sans-serif";
-  const fontSize = isHindi ? 52 : 56;
+  const fontSize = isHindi ? 48 : 54;
 
   return (
     <div
-      className="relative bg-white border-2 border-purple-200 rounded-3xl overflow-hidden shadow-pop animate-pop-in flex items-center justify-center"
-      style={{ width: 90, height: 90, flexShrink: 0 }}
+      className="relative bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-purple-200 rounded-2xl overflow-hidden shadow-pop animate-pop-in flex items-center justify-center"
+      style={{ width: 84, height: 84, flexShrink: 0 }}
     >
-      {/* Ghost letter — full shape, always visible in light gray */}
-      <span
-        className="absolute select-none leading-none"
-        aria-hidden
-        style={{ fontFamily, fontWeight: 800, fontSize, color: "#e2e8f0" }}
-      >
-        {item}
-      </span>
+      {/* Faint notebook lines */}
+      <div className="absolute inset-0 opacity-30" style={{
+        backgroundImage: "repeating-linear-gradient(0deg, transparent 0 18px, rgba(139,92,246,0.25) 18px 19px)"
+      }} />
 
-      {/* Colored letter that wipes in top-to-bottom */}
+      {/* Colorful letter */}
       <span
-        className="relative select-none leading-none animate-write-reveal"
+        className="relative select-none leading-none animate-pop-in"
         aria-hidden
         style={{
           fontFamily,
@@ -109,11 +105,11 @@ function TracingDemo({ item }: { item: string }) {
         {item}
       </span>
 
-      {/* Pencil that slides down in sync with the reveal */}
+      {/* Pencil bouncing on top-right */}
       <span
-        className="absolute right-1 text-sm animate-pencil-trace"
+        className="absolute top-1 right-1 text-lg animate-bounce"
         aria-hidden
-        style={{ position: "absolute" }}
+        style={{ animationDuration: "1.2s" }}
       >
         ✏️
       </span>
@@ -132,7 +128,6 @@ function Tracing() {
   const drawingRef = useRef(false);
   const lastRef = useRef<{ x: number; y: number } | null>(null);
 
-  // Sample points along the character's path for validation
   const targetPoints = useMemo(() => {
     const pStr = CHARACTER_PATHS[item];
     if (!pStr) return [];
@@ -143,12 +138,14 @@ function Tracing() {
   const totalUserPointsRef = useRef(0);
   const offPathPointsRef = useRef(0);
 
+  // Reset index when language switches (avoid stale slot)
+  useEffect(() => { setIdx(0); }, [lang]);
+
   useEffect(() => {
     const c = canvasRef.current;
     if (!c) return;
     let rafId: number;
 
-    // Wait until the canvas has actual dimensions (flex-1 layout may not resolve immediately)
     function init() {
       const dpr = window.devicePixelRatio || 1;
       const rect = c!.getBoundingClientRect();
