@@ -217,35 +217,6 @@ function Tracing() {
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   }
 
-  function getPathSpaceCoords(x: number, y: number) {
-    const c = canvasRef.current;
-    if (!c) return { x: 50, y: 50 };
-    const rect = c.getBoundingClientRect();
-    const w = rect.width;
-    const h = rect.height;
-    const size = Math.min(w, h) * 0.70;
-    const scale = size / 100;
-    const dx = (w - size) / 2;
-    const dy = (h - size) / 2;
-    return {
-      x: (x - dx) / scale,
-      y: (y - dy) / scale
-    };
-  }
-
-  function checkTracingProgress(x: number, y: number) {
-    if (!canvasRef.current || targetPoints.length === 0) return;
-    const pt = getPathSpaceCoords(x, y);
-    totalUserPointsRef.current += 1;
-    let minDistance = 999;
-    targetPoints.forEach((targetPt, i) => {
-      const dist = Math.hypot(pt.x - targetPt.x, pt.y - targetPt.y);
-      if (dist < minDistance) minDistance = dist;
-      if (dist < 16) hitsRef.current[i] = true;
-    });
-    if (minDistance > 28) offPathPointsRef.current += 1;
-  }
-
   function start(e: React.PointerEvent<HTMLCanvasElement>) {
     e.preventDefault();
     drawingRef.current = true;
@@ -272,7 +243,7 @@ function Tracing() {
     ctx.lineTo(p.x, p.y);
     ctx.stroke();
     lastRef.current = p;
-    checkTracingProgress(p.x, p.y);
+    totalUserPointsRef.current += 1;
   }
 
   function end() {
@@ -281,11 +252,8 @@ function Tracing() {
     lastRef.current = null;
     pop();
 
-    const hitCount = hitsRef.current.filter(Boolean).length;
-    const hitRatio = hitCount / Math.max(1, targetPoints.length);
-    const scribbleRatio = offPathPointsRef.current / Math.max(1, totalUserPointsRef.current);
-
-    if (hitRatio >= 0.50 && scribbleRatio < 0.40 && !celebrate) {
+    // Simple, toddler-friendly completion: celebrate once the child has drawn enough.
+    if (totalUserPointsRef.current >= 60 && !celebrate) {
       setCelebrate(true);
       chime();
       haptic(40);
@@ -303,9 +271,7 @@ function Tracing() {
     if (!ctx) return;
     const r = c.getBoundingClientRect();
     drawGuide(ctx, r.width, r.height, item);
-    hitsRef.current = new Array(targetPoints.length).fill(false);
     totalUserPointsRef.current = 0;
-    offPathPointsRef.current = 0;
     setCelebrate(false);
   }
 
