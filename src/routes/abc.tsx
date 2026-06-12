@@ -52,9 +52,33 @@ const BILINGUAL_LETTERS: {
   { letter: "Z", letterHi: "जेड", wordEn: "Zebra", wordHi: "जेब्रा", wordHiPhonetic: "जेब्रा", emoji: "🦓", gradient: "bg-gradient-numbers" },
 ];
 
+// Normalize Hindi dataset to match the bilingual shape used here
+type Item = {
+  letter: string;
+  letterHi: string;
+  wordEn: string;
+  wordHi: string;
+  wordHiPhonetic: string;
+  emoji: string;
+  gradient: string;
+  isHindi: boolean;
+};
+
+const EN_LIST: Item[] = BILINGUAL_LETTERS.map((x) => ({ ...x, isHindi: false }));
+const HI_LIST: Item[] = HINDI_LETTERS.map((x) => ({
+  letter: x.letter,
+  letterHi: x.letter,
+  wordEn: x.wordEn,
+  wordHi: x.word,
+  wordHiPhonetic: x.word,
+  emoji: x.emoji,
+  gradient: x.gradient,
+  isHindi: true,
+}));
+
 function ABC() {
   const lang = useLang();
-  const LETTERS = BILINGUAL_LETTERS;
+  const LETTERS = lang === "hi" ? HI_LIST : EN_LIST;
   const [idx, setIdx] = useState(0);
   const [burst, setBurst] = useState(0);
   const safeIdx = idx % LETTERS.length;
@@ -71,13 +95,11 @@ function ABC() {
     haptic(); pop();
     const t = setTimeout(() => {
       if (lang === "hi") {
-        // Hindi mode: "ए... ए से एप्पल... एप्पल यानी सेब!"
-        speak(`${item.letterHi}... ${item.letterHi} से ${item.wordHiPhonetic}... ${item.wordHiPhonetic} यानी ${item.wordHi}!`);
+        speak(`${item.letterHi}... ${item.letterHi} से ${item.wordHi}`);
       } else {
-        // English mode: "A... A for Apple... Apple means Seb!"
-        speak(`${item.letter}... ${item.letter} for ${item.wordEn}... ${item.wordEn} means ${item.wordHi}!`);
+        speak(`${item.letter}... ${item.letter} for ${item.wordEn}`);
       }
-    }, 150);
+    }, 200);
     return () => clearTimeout(t);
   }, [item.letter, item.wordEn, lang]);
 
@@ -86,11 +108,14 @@ function ABC() {
     setBurst((b) => b + 1);
     markLetter(item.letter);
     if (lang === "hi") {
-      speak(`${item.letterHi} फॉर ${item.wordHiPhonetic}! ${item.wordHiPhonetic} यानी ${item.wordHi}!`);
+      speak(`${item.letterHi} से ${item.wordHi}!`);
     } else {
-      speak(`${item.letter} for ${item.wordEn}! ${item.wordEn} means ${item.wordHi}!`);
+      speak(`${item.letter} for ${item.wordEn}!`);
     }
   }
+
+  // Reset index when language switches so we don't land on an invalid slot
+  useEffect(() => { setIdx(0); }, [lang]);
 
   return (
     <main className={`min-h-screen ${item.gradient} flex flex-col select-none transition-colors duration-500`}>
@@ -116,7 +141,7 @@ function ABC() {
           key={`${lang}-${item.letter}`}
           className="relative bg-white rounded-[48px] size-64 sm:size-80 flex items-center justify-center shadow-pop active:scale-95 transition-transform animate-pop-in"
         >
-          <span className="text-[12rem] sm:text-[16rem] font-black leading-none bg-gradient-hero bg-clip-text text-transparent">
+          <span className={`${item.isHindi ? "font-hindi text-[10rem] sm:text-[14rem]" : "text-[12rem] sm:text-[16rem]"} font-black leading-none bg-gradient-hero bg-clip-text text-transparent`}>
             {item.letter}
           </span>
         </button>
@@ -124,8 +149,8 @@ function ABC() {
         <div className="mt-8 flex items-center gap-4 bg-white/95 rounded-full pl-3 pr-6 py-3 shadow-pop animate-pop-in">
           <span className="text-5xl animate-wiggle">{item.emoji}</span>
           <div className="flex flex-col items-start leading-tight">
-            <span className="text-2xl font-extrabold">
-              {lang === "hi" ? `${item.wordHiPhonetic} (${item.wordHi})` : item.wordEn}
+            <span className={`text-2xl font-extrabold ${item.isHindi ? "font-hindi" : ""}`}>
+              {lang === "hi" ? item.wordHi : item.wordEn}
             </span>
             {lang === "hi" && <span className="text-xs font-bold text-muted-foreground">{item.wordEn}</span>}
           </div>
