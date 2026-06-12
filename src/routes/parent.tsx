@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { loadProgress } from "@/lib/progress";
+import { loadProgress, resetProgress } from "@/lib/progress";
 import { t, useLang } from "@/lib/i18n";
 import { LangToggle } from "@/components/LangToggle";
 
@@ -21,8 +21,15 @@ function Parent() {
   const [b] = useState(() => 2 + Math.floor(Math.random() * 6));
   const [answer, setAnswer] = useState("");
   const [progress, setProgress] = useState(loadProgress());
+  const [showReset, setShowReset] = useState(false);
 
   useEffect(() => { if (unlocked) setProgress(loadProgress()); }, [unlocked]);
+
+  function handleReset() {
+    resetProgress();
+    setProgress(loadProgress());
+    setShowReset(false);
+  }
 
   if (!unlocked) {
     return (
@@ -67,6 +74,9 @@ function Parent() {
         <Stat label={t("lettersLearned", lang)} value={progress.letters.length} emoji="🔤" />
         <Stat label={t("itemsTraced", lang)} value={progress.traced.length} emoji="✏️" />
         <Stat label={t("numbersStat", lang)} value={progress.numbers.length} emoji="🔢" />
+        <Stat label={t("animalsStat", lang)} value={progress.animals?.length ?? 0} emoji="🦁" />
+        <Stat label={t("colorsStat", lang)} value={progress.colors?.length ?? 0} emoji="🎨" />
+        <Stat label={t("quizScore", lang)} value={progress.quizScore ?? 0} emoji="🧠" />
       </section>
 
       <section className="px-5 mt-8">
@@ -77,6 +87,27 @@ function Parent() {
             <span key={l} className="size-12 rounded-2xl bg-gradient-abc text-white font-extrabold flex items-center justify-center shadow-pop">{l}</span>
           ))}
         </div>
+      </section>
+
+      {/* Reset section */}
+      <section className="px-5 mt-8 mb-4">
+        {!showReset ? (
+          <button
+            type="button"
+            onClick={() => setShowReset(true)}
+            className="w-full rounded-2xl border-2 border-destructive/40 text-destructive font-bold py-3 text-sm"
+          >
+            🗑️ {t("resetProgress", lang)}
+          </button>
+        ) : (
+          <div className="bg-card rounded-2xl p-4 shadow-pop">
+            <p className="text-center font-bold">{t("resetConfirm", lang)}</p>
+            <div className="flex gap-3 mt-3">
+              <button type="button" onClick={handleReset} className="flex-1 rounded-xl bg-destructive text-white font-bold py-2">{t("yes", lang)}</button>
+              <button type="button" onClick={() => setShowReset(false)} className="flex-1 rounded-xl bg-muted font-bold py-2">{t("cancel", lang)}</button>
+            </div>
+          </div>
+        )}
       </section>
     </main>
   );

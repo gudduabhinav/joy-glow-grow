@@ -15,7 +15,11 @@ export const Route = createFileRoute("/tracing")({
   component: Tracing,
 });
 
-const EN_ITEMS = ["A", "B", "C", "1", "2", "3", "O", "L", "S"];
+const EN_ITEMS = [
+  "A","B","C","D","E","F","G","H","I","J","K","L","M",
+  "N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+  "1","2","3","4","5","6","7","8","9","10",
+];
 const HI_ITEMS = [
   "अ","आ","इ","ई","उ","ऊ","ए","ऐ","ओ","औ",
   "क","ख","ग","घ","च","छ","ज","झ",
@@ -169,8 +173,6 @@ function Tracing() {
         drawGuide(ctx, r.width, r.height, item);
       }
     });
-    ro.observe(c);
-
     ro.observe(c);
 
     hitCellsRef.current.clear();

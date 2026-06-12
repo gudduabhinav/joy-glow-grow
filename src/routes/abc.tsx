@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { speak, pop, chime, haptic } from "@/lib/audio";
 import { markLetter } from "@/lib/progress";
 import { useLang, HINDI_LETTERS } from "@/lib/i18n";
@@ -84,6 +84,16 @@ function ABC() {
   const safeIdx = idx % LETTERS.length;
   const item = LETTERS[safeIdx];
 
+  // Swipe gesture
+  const touchStartX = useRef(0);
+  function onTouchStart(e: React.TouchEvent) { touchStartX.current = e.touches[0].clientX; }
+  function onTouchEnd(e: React.TouchEvent) {
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) < 50) return;
+    if (dx < 0) setIdx((i) => (i + 1) % LETTERS.length);
+    else setIdx((i) => (i - 1 + LETTERS.length) % LETTERS.length);
+  }
+
   const particles = useMemo(() => Array.from({ length: 14 }, (_, i) => ({
     id: `${burst}-${i}`,
     x: Math.cos((i / 14) * Math.PI * 2) * (60 + Math.random() * 40),
@@ -118,7 +128,11 @@ function ABC() {
   useEffect(() => { setIdx(0); }, [lang]);
 
   return (
-    <main className={`min-h-screen ${item.gradient} flex flex-col select-none transition-colors duration-500`}>
+    <main
+      className={`min-h-screen ${item.gradient} flex flex-col select-none transition-colors duration-500`}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
       <header className="flex items-center justify-between px-5 pt-6">
         <Link to="/" className="rounded-full bg-white/90 size-14 flex items-center justify-center shadow-pop text-2xl active:scale-95" aria-label="Home">🏠</Link>
         <LangToggle />

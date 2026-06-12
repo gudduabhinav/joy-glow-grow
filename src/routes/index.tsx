@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Mascot } from "@/components/Mascot";
 import { ModuleCard } from "@/components/ModuleCard";
 import { LangToggle } from "@/components/LangToggle";
-import { loadProgress } from "@/lib/progress";
+import { loadProgress, updateStreak } from "@/lib/progress";
 import { speak, pop, haptic } from "@/lib/audio";
 import { t, useLang } from "@/lib/i18n";
 
@@ -29,7 +29,15 @@ export const Route = createFileRoute("/")({
 function Home() {
   const lang = useLang();
   const [stars, setStars] = useState(0);
-  useEffect(() => { setStars(loadProgress().stars); }, []);
+  const [streak, setStreak] = useState(1);
+  useEffect(() => {
+    const p = loadProgress();
+    setStars(p.stars);
+    setStreak(updateStreak());
+    const onFocus = () => { const fp = loadProgress(); setStars(fp.stars); setStreak(fp.streak ?? 1); };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, []);
 
   return (
     <main className="min-h-screen bg-background pb-12 select-none">
@@ -37,6 +45,10 @@ function Home() {
         <div className="flex items-center gap-2 rounded-full bg-white/80 backdrop-blur px-4 py-2 shadow-pop">
           <span className="text-2xl">⭐</span>
           <span className="text-xl font-extrabold tabular-nums">{stars}</span>
+        </div>
+        <div className="flex items-center gap-1 rounded-full bg-white/80 backdrop-blur px-3 py-2 shadow-pop">
+          <span className="text-lg">🔥</span>
+          <span className="text-base font-extrabold tabular-nums">{streak}</span>
         </div>
         <LangToggle />
         <Link to="/parent" className="rounded-full bg-white/80 backdrop-blur px-3 py-2 shadow-pop text-sm font-bold">
@@ -56,6 +68,7 @@ function Home() {
         <p className="mt-2 text-base font-semibold text-muted-foreground">{t("appTagline", lang)}</p>
       </section>
 
+      {/* Learning Modules */}
       <section className="px-4 grid grid-cols-2 gap-4">
         <ModuleCard to="/rhymes" title={t("rhymes", lang)} emoji="🎶" gradient="bg-gradient-rhymes" description={t("rhymesDesc", lang)} className="col-span-2" />
         <ModuleCard to="/abc" title={t("abc", lang)} emoji="🅰️" gradient="bg-gradient-abc" description={t("abcDesc", lang)} />
@@ -64,6 +77,31 @@ function Home() {
         <ModuleCard to="/shapes" title={t("shapes", lang)} emoji="🔺" gradient="bg-gradient-shapes" description={t("shapesDesc", lang)} />
         <ModuleCard to="/colors" title={t("colors", lang)} emoji="🎨" gradient="bg-gradient-colors" description={t("colorsDesc", lang)} />
         <ModuleCard to="/animals" title={t("animals", lang)} emoji="🦁" gradient="bg-gradient-animals" description={t("animalsDesc", lang)} />
+        <ModuleCard to="/fruits" title={t("fruits", lang)} emoji="🍎" gradient="bg-gradient-shapes" description={t("fruitsDesc", lang)} />
+        <ModuleCard to="/body" title={t("body", lang)} emoji="👁️" gradient="bg-gradient-colors" description={t("bodyDesc", lang)} />
+        <ModuleCard to="/quiz" title={t("quiz", lang)} emoji="🧠" gradient="bg-gradient-rhymes" description={t("quizDesc", lang)} className="col-span-2" />
+      </section>
+
+      {/* Games & Challenges */}
+      <section className="px-4 mt-8">
+        <h2 className="text-2xl font-extrabold mb-4 px-1">🎮 Games & Challenges</h2>
+        <div className="grid grid-cols-2 gap-4">
+          <ModuleCard to="/peek-a-buddy" title={t("peekABuddy", lang)} emoji="👋" gradient="bg-gradient-rhymes" description={t("peekABuddyDesc", lang)} />
+          <ModuleCard to="/sound-match" title={t("soundMatch", lang)} emoji="🔊" gradient="bg-gradient-animals" description={t("soundMatchDesc", lang)} />
+          <ModuleCard to="/color-mix" title={t("colorMixLab", lang)} emoji="🎨" gradient="bg-gradient-colors" description={t("colorMixDesc", lang)} />
+          <ModuleCard to="/phonics-farm" title={t("phonicsFarm", lang)} emoji="🌾" gradient="bg-gradient-abc" description={t("phonicsFarmDesc", lang)} />
+          <ModuleCard to="/trace-race" title={t("traceRace", lang)} emoji="⚡" gradient="bg-gradient-tracing" description={t("traceRaceDesc", lang)} />
+          <ModuleCard to="/rhythm-tap" title={t("rhythmTap", lang)} emoji="🎵" gradient="bg-gradient-rhymes" description={t("rhythmTapDesc", lang)} />
+          <ModuleCard to="/puzzle-slide" title={t("puzzleSlide", lang)} emoji="🧩" gradient="bg-gradient-shapes" description={t("puzzleSlideDesc", lang)} />
+          <ModuleCard to="/shape-builder" title={t("shapeBuilder", lang)} emoji="🔨" gradient="bg-gradient-shapes" description={t("shapeBuilderDesc", lang)} />
+          <ModuleCard to="/treasure-map" title={t("treasureMap", lang)} emoji="🗺️" gradient="bg-gradient-numbers" description={t("treasureMapDesc", lang)} />
+          <ModuleCard to="/memory-garden" title={t("memoryGarden", lang)} emoji="🌿" gradient="bg-gradient-animals" description={t("memoryGardenDesc", lang)} />
+          <ModuleCard to="/sticker-studio" title={t("stickerStudio", lang)} emoji="✨" gradient="bg-gradient-abc" description={t("stickerStudioDesc", lang)} />
+          <ModuleCard to="/daily-challenge" title={t("dailyChallenge", lang)} emoji="🌟" gradient="bg-gradient-hero" description={t("dailyChallengeDesc", lang)} />
+          <ModuleCard to="/leaderboard" title={t("leaderboard", lang)} emoji="🏆" gradient="bg-gradient-colors" description={t("leaderboardDesc", lang)} />
+          <ModuleCard to="/story-builder" title={t("storyBuilder", lang)} emoji="📖" gradient="bg-gradient-rhymes" description={t("storyBuilderDesc", lang)} />
+          <ModuleCard to="/reward-shop" title={t("rewardShop", lang)} emoji="🛍️" gradient="bg-gradient-abc" description={t("rewardShopDesc", lang)} className="col-span-2" />
+        </div>
       </section>
 
       <p className="mt-10 text-center text-xs font-semibold text-muted-foreground px-6">

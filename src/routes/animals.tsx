@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { chime, haptic, pop, speak } from "@/lib/audio";
-import { addStars } from "@/lib/progress";
+import { markAnimal } from "@/lib/progress";
 import { ANIMALS_DATA, useLang } from "@/lib/i18n";
 import { LangToggle } from "@/components/LangToggle";
 
@@ -22,7 +22,7 @@ function Animals() {
   function tap(a: typeof ANIMALS_DATA[number]) {
     haptic(); pop(); chime();
     setActive(a.id);
-    addStars(1);
+    markAnimal(a.id);
     const text = lang === "hi" ? `${a.hi}. ${a.soundHi}` : `${a.en}. ${a.soundEn}`;
     speak(text);
     setTimeout(() => setActive(null), 800);

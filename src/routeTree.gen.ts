@@ -9,19 +9,62 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TreasureMapRouteImport } from './routes/treasure-map'
 import { Route as TracingRouteImport } from './routes/tracing'
+import { Route as TraceRaceRouteImport } from './routes/trace-race'
+import { Route as StoryBuilderRouteImport } from './routes/story-builder'
+import { Route as StickerStudioRouteImport } from './routes/sticker-studio'
+import { Route as SoundMatchRouteImport } from './routes/sound-match'
 import { Route as ShapesRouteImport } from './routes/shapes'
+import { Route as ShapeBuilderRouteImport } from './routes/shape-builder'
+import { Route as RhythmTapRouteImport } from './routes/rhythm-tap'
 import { Route as RhymesRouteImport } from './routes/rhymes'
+import { Route as RewardShopRouteImport } from './routes/reward-shop'
+import { Route as QuizRouteImport } from './routes/quiz'
+import { Route as PuzzleSlideRouteImport } from './routes/puzzle-slide'
+import { Route as PhonicsFarmRouteImport } from './routes/phonics-farm'
+import { Route as PeekABuddyRouteImport } from './routes/peek-a-buddy'
 import { Route as ParentRouteImport } from './routes/parent'
 import { Route as NumbersRouteImport } from './routes/numbers'
+import { Route as MemoryGardenRouteImport } from './routes/memory-garden'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as FruitsRouteImport } from './routes/fruits'
+import { Route as DailyChallengeRouteImport } from './routes/daily-challenge'
 import { Route as ColorsRouteImport } from './routes/colors'
+import { Route as ColorMixRouteImport } from './routes/color-mix'
+import { Route as BodyRouteImport } from './routes/body'
 import { Route as AnimalsRouteImport } from './routes/animals'
 import { Route as AbcRouteImport } from './routes/abc'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TreasureMapRoute = TreasureMapRouteImport.update({
+  id: '/treasure-map',
+  path: '/treasure-map',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TracingRoute = TracingRouteImport.update({
   id: '/tracing',
   path: '/tracing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TraceRaceRoute = TraceRaceRouteImport.update({
+  id: '/trace-race',
+  path: '/trace-race',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoryBuilderRoute = StoryBuilderRouteImport.update({
+  id: '/story-builder',
+  path: '/story-builder',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StickerStudioRoute = StickerStudioRouteImport.update({
+  id: '/sticker-studio',
+  path: '/sticker-studio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SoundMatchRoute = SoundMatchRouteImport.update({
+  id: '/sound-match',
+  path: '/sound-match',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShapesRoute = ShapesRouteImport.update({
@@ -29,9 +72,44 @@ const ShapesRoute = ShapesRouteImport.update({
   path: '/shapes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShapeBuilderRoute = ShapeBuilderRouteImport.update({
+  id: '/shape-builder',
+  path: '/shape-builder',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RhythmTapRoute = RhythmTapRouteImport.update({
+  id: '/rhythm-tap',
+  path: '/rhythm-tap',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RhymesRoute = RhymesRouteImport.update({
   id: '/rhymes',
   path: '/rhymes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RewardShopRoute = RewardShopRouteImport.update({
+  id: '/reward-shop',
+  path: '/reward-shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuizRoute = QuizRouteImport.update({
+  id: '/quiz',
+  path: '/quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PuzzleSlideRoute = PuzzleSlideRouteImport.update({
+  id: '/puzzle-slide',
+  path: '/puzzle-slide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PhonicsFarmRoute = PhonicsFarmRouteImport.update({
+  id: '/phonics-farm',
+  path: '/phonics-farm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PeekABuddyRoute = PeekABuddyRouteImport.update({
+  id: '/peek-a-buddy',
+  path: '/peek-a-buddy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParentRoute = ParentRouteImport.update({
@@ -44,9 +122,39 @@ const NumbersRoute = NumbersRouteImport.update({
   path: '/numbers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MemoryGardenRoute = MemoryGardenRouteImport.update({
+  id: '/memory-garden',
+  path: '/memory-garden',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FruitsRoute = FruitsRouteImport.update({
+  id: '/fruits',
+  path: '/fruits',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DailyChallengeRoute = DailyChallengeRouteImport.update({
+  id: '/daily-challenge',
+  path: '/daily-challenge',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ColorsRoute = ColorsRouteImport.update({
   id: '/colors',
   path: '/colors',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ColorMixRoute = ColorMixRouteImport.update({
+  id: '/color-mix',
+  path: '/color-mix',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BodyRoute = BodyRouteImport.update({
+  id: '/body',
+  path: '/body',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnimalsRoute = AnimalsRouteImport.update({
@@ -69,35 +177,89 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/abc': typeof AbcRoute
   '/animals': typeof AnimalsRoute
+  '/body': typeof BodyRoute
+  '/color-mix': typeof ColorMixRoute
   '/colors': typeof ColorsRoute
+  '/daily-challenge': typeof DailyChallengeRoute
+  '/fruits': typeof FruitsRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/memory-garden': typeof MemoryGardenRoute
   '/numbers': typeof NumbersRoute
   '/parent': typeof ParentRoute
+  '/peek-a-buddy': typeof PeekABuddyRoute
+  '/phonics-farm': typeof PhonicsFarmRoute
+  '/puzzle-slide': typeof PuzzleSlideRoute
+  '/quiz': typeof QuizRoute
+  '/reward-shop': typeof RewardShopRoute
   '/rhymes': typeof RhymesRoute
+  '/rhythm-tap': typeof RhythmTapRoute
+  '/shape-builder': typeof ShapeBuilderRoute
   '/shapes': typeof ShapesRoute
+  '/sound-match': typeof SoundMatchRoute
+  '/sticker-studio': typeof StickerStudioRoute
+  '/story-builder': typeof StoryBuilderRoute
+  '/trace-race': typeof TraceRaceRoute
   '/tracing': typeof TracingRoute
+  '/treasure-map': typeof TreasureMapRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/abc': typeof AbcRoute
   '/animals': typeof AnimalsRoute
+  '/body': typeof BodyRoute
+  '/color-mix': typeof ColorMixRoute
   '/colors': typeof ColorsRoute
+  '/daily-challenge': typeof DailyChallengeRoute
+  '/fruits': typeof FruitsRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/memory-garden': typeof MemoryGardenRoute
   '/numbers': typeof NumbersRoute
   '/parent': typeof ParentRoute
+  '/peek-a-buddy': typeof PeekABuddyRoute
+  '/phonics-farm': typeof PhonicsFarmRoute
+  '/puzzle-slide': typeof PuzzleSlideRoute
+  '/quiz': typeof QuizRoute
+  '/reward-shop': typeof RewardShopRoute
   '/rhymes': typeof RhymesRoute
+  '/rhythm-tap': typeof RhythmTapRoute
+  '/shape-builder': typeof ShapeBuilderRoute
   '/shapes': typeof ShapesRoute
+  '/sound-match': typeof SoundMatchRoute
+  '/sticker-studio': typeof StickerStudioRoute
+  '/story-builder': typeof StoryBuilderRoute
+  '/trace-race': typeof TraceRaceRoute
   '/tracing': typeof TracingRoute
+  '/treasure-map': typeof TreasureMapRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/abc': typeof AbcRoute
   '/animals': typeof AnimalsRoute
+  '/body': typeof BodyRoute
+  '/color-mix': typeof ColorMixRoute
   '/colors': typeof ColorsRoute
+  '/daily-challenge': typeof DailyChallengeRoute
+  '/fruits': typeof FruitsRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/memory-garden': typeof MemoryGardenRoute
   '/numbers': typeof NumbersRoute
   '/parent': typeof ParentRoute
+  '/peek-a-buddy': typeof PeekABuddyRoute
+  '/phonics-farm': typeof PhonicsFarmRoute
+  '/puzzle-slide': typeof PuzzleSlideRoute
+  '/quiz': typeof QuizRoute
+  '/reward-shop': typeof RewardShopRoute
   '/rhymes': typeof RhymesRoute
+  '/rhythm-tap': typeof RhythmTapRoute
+  '/shape-builder': typeof ShapeBuilderRoute
   '/shapes': typeof ShapesRoute
+  '/sound-match': typeof SoundMatchRoute
+  '/sticker-studio': typeof StickerStudioRoute
+  '/story-builder': typeof StoryBuilderRoute
+  '/trace-race': typeof TraceRaceRoute
   '/tracing': typeof TracingRoute
+  '/treasure-map': typeof TreasureMapRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -105,55 +267,162 @@ export interface FileRouteTypes {
     | '/'
     | '/abc'
     | '/animals'
+    | '/body'
+    | '/color-mix'
     | '/colors'
+    | '/daily-challenge'
+    | '/fruits'
+    | '/leaderboard'
+    | '/memory-garden'
     | '/numbers'
     | '/parent'
+    | '/peek-a-buddy'
+    | '/phonics-farm'
+    | '/puzzle-slide'
+    | '/quiz'
+    | '/reward-shop'
     | '/rhymes'
+    | '/rhythm-tap'
+    | '/shape-builder'
     | '/shapes'
+    | '/sound-match'
+    | '/sticker-studio'
+    | '/story-builder'
+    | '/trace-race'
     | '/tracing'
+    | '/treasure-map'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/abc'
     | '/animals'
+    | '/body'
+    | '/color-mix'
     | '/colors'
+    | '/daily-challenge'
+    | '/fruits'
+    | '/leaderboard'
+    | '/memory-garden'
     | '/numbers'
     | '/parent'
+    | '/peek-a-buddy'
+    | '/phonics-farm'
+    | '/puzzle-slide'
+    | '/quiz'
+    | '/reward-shop'
     | '/rhymes'
+    | '/rhythm-tap'
+    | '/shape-builder'
     | '/shapes'
+    | '/sound-match'
+    | '/sticker-studio'
+    | '/story-builder'
+    | '/trace-race'
     | '/tracing'
+    | '/treasure-map'
   id:
     | '__root__'
     | '/'
     | '/abc'
     | '/animals'
+    | '/body'
+    | '/color-mix'
     | '/colors'
+    | '/daily-challenge'
+    | '/fruits'
+    | '/leaderboard'
+    | '/memory-garden'
     | '/numbers'
     | '/parent'
+    | '/peek-a-buddy'
+    | '/phonics-farm'
+    | '/puzzle-slide'
+    | '/quiz'
+    | '/reward-shop'
     | '/rhymes'
+    | '/rhythm-tap'
+    | '/shape-builder'
     | '/shapes'
+    | '/sound-match'
+    | '/sticker-studio'
+    | '/story-builder'
+    | '/trace-race'
     | '/tracing'
+    | '/treasure-map'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AbcRoute: typeof AbcRoute
   AnimalsRoute: typeof AnimalsRoute
+  BodyRoute: typeof BodyRoute
+  ColorMixRoute: typeof ColorMixRoute
   ColorsRoute: typeof ColorsRoute
+  DailyChallengeRoute: typeof DailyChallengeRoute
+  FruitsRoute: typeof FruitsRoute
+  LeaderboardRoute: typeof LeaderboardRoute
+  MemoryGardenRoute: typeof MemoryGardenRoute
   NumbersRoute: typeof NumbersRoute
   ParentRoute: typeof ParentRoute
+  PeekABuddyRoute: typeof PeekABuddyRoute
+  PhonicsFarmRoute: typeof PhonicsFarmRoute
+  PuzzleSlideRoute: typeof PuzzleSlideRoute
+  QuizRoute: typeof QuizRoute
+  RewardShopRoute: typeof RewardShopRoute
   RhymesRoute: typeof RhymesRoute
+  RhythmTapRoute: typeof RhythmTapRoute
+  ShapeBuilderRoute: typeof ShapeBuilderRoute
   ShapesRoute: typeof ShapesRoute
+  SoundMatchRoute: typeof SoundMatchRoute
+  StickerStudioRoute: typeof StickerStudioRoute
+  StoryBuilderRoute: typeof StoryBuilderRoute
+  TraceRaceRoute: typeof TraceRaceRoute
   TracingRoute: typeof TracingRoute
+  TreasureMapRoute: typeof TreasureMapRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/treasure-map': {
+      id: '/treasure-map'
+      path: '/treasure-map'
+      fullPath: '/treasure-map'
+      preLoaderRoute: typeof TreasureMapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tracing': {
       id: '/tracing'
       path: '/tracing'
       fullPath: '/tracing'
       preLoaderRoute: typeof TracingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trace-race': {
+      id: '/trace-race'
+      path: '/trace-race'
+      fullPath: '/trace-race'
+      preLoaderRoute: typeof TraceRaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/story-builder': {
+      id: '/story-builder'
+      path: '/story-builder'
+      fullPath: '/story-builder'
+      preLoaderRoute: typeof StoryBuilderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sticker-studio': {
+      id: '/sticker-studio'
+      path: '/sticker-studio'
+      fullPath: '/sticker-studio'
+      preLoaderRoute: typeof StickerStudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sound-match': {
+      id: '/sound-match'
+      path: '/sound-match'
+      fullPath: '/sound-match'
+      preLoaderRoute: typeof SoundMatchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/shapes': {
@@ -163,11 +432,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShapesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shape-builder': {
+      id: '/shape-builder'
+      path: '/shape-builder'
+      fullPath: '/shape-builder'
+      preLoaderRoute: typeof ShapeBuilderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rhythm-tap': {
+      id: '/rhythm-tap'
+      path: '/rhythm-tap'
+      fullPath: '/rhythm-tap'
+      preLoaderRoute: typeof RhythmTapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rhymes': {
       id: '/rhymes'
       path: '/rhymes'
       fullPath: '/rhymes'
       preLoaderRoute: typeof RhymesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reward-shop': {
+      id: '/reward-shop'
+      path: '/reward-shop'
+      fullPath: '/reward-shop'
+      preLoaderRoute: typeof RewardShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quiz': {
+      id: '/quiz'
+      path: '/quiz'
+      fullPath: '/quiz'
+      preLoaderRoute: typeof QuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/puzzle-slide': {
+      id: '/puzzle-slide'
+      path: '/puzzle-slide'
+      fullPath: '/puzzle-slide'
+      preLoaderRoute: typeof PuzzleSlideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/phonics-farm': {
+      id: '/phonics-farm'
+      path: '/phonics-farm'
+      fullPath: '/phonics-farm'
+      preLoaderRoute: typeof PhonicsFarmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/peek-a-buddy': {
+      id: '/peek-a-buddy'
+      path: '/peek-a-buddy'
+      fullPath: '/peek-a-buddy'
+      preLoaderRoute: typeof PeekABuddyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parent': {
@@ -184,11 +502,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NumbersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/memory-garden': {
+      id: '/memory-garden'
+      path: '/memory-garden'
+      fullPath: '/memory-garden'
+      preLoaderRoute: typeof MemoryGardenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fruits': {
+      id: '/fruits'
+      path: '/fruits'
+      fullPath: '/fruits'
+      preLoaderRoute: typeof FruitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/daily-challenge': {
+      id: '/daily-challenge'
+      path: '/daily-challenge'
+      fullPath: '/daily-challenge'
+      preLoaderRoute: typeof DailyChallengeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/colors': {
       id: '/colors'
       path: '/colors'
       fullPath: '/colors'
       preLoaderRoute: typeof ColorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/color-mix': {
+      id: '/color-mix'
+      path: '/color-mix'
+      fullPath: '/color-mix'
+      preLoaderRoute: typeof ColorMixRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/body': {
+      id: '/body'
+      path: '/body'
+      fullPath: '/body'
+      preLoaderRoute: typeof BodyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/animals': {
@@ -219,12 +579,30 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AbcRoute: AbcRoute,
   AnimalsRoute: AnimalsRoute,
+  BodyRoute: BodyRoute,
+  ColorMixRoute: ColorMixRoute,
   ColorsRoute: ColorsRoute,
+  DailyChallengeRoute: DailyChallengeRoute,
+  FruitsRoute: FruitsRoute,
+  LeaderboardRoute: LeaderboardRoute,
+  MemoryGardenRoute: MemoryGardenRoute,
   NumbersRoute: NumbersRoute,
   ParentRoute: ParentRoute,
+  PeekABuddyRoute: PeekABuddyRoute,
+  PhonicsFarmRoute: PhonicsFarmRoute,
+  PuzzleSlideRoute: PuzzleSlideRoute,
+  QuizRoute: QuizRoute,
+  RewardShopRoute: RewardShopRoute,
   RhymesRoute: RhymesRoute,
+  RhythmTapRoute: RhythmTapRoute,
+  ShapeBuilderRoute: ShapeBuilderRoute,
   ShapesRoute: ShapesRoute,
+  SoundMatchRoute: SoundMatchRoute,
+  StickerStudioRoute: StickerStudioRoute,
+  StoryBuilderRoute: StoryBuilderRoute,
+  TraceRaceRoute: TraceRaceRoute,
   TracingRoute: TracingRoute,
+  TreasureMapRoute: TreasureMapRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

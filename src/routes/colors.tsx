@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { chime, haptic, pop, speak } from "@/lib/audio";
-import { addStars } from "@/lib/progress";
+import { markColor } from "@/lib/progress";
 import { COLORS_DATA, useLang } from "@/lib/i18n";
 import { LangToggle } from "@/components/LangToggle";
 
@@ -22,7 +22,7 @@ function Colors() {
   function tap(id: string, en: string, hi: string) {
     haptic(); pop();
     setPicked(id);
-    addStars(1);
+    markColor(id);
     chime();
     speak(lang === "hi" ? hi : en);
   }
