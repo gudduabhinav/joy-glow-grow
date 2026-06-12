@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import { chime, haptic, pop, speak } from "@/lib/audio";
 import { markTraced } from "@/lib/progress";
 import { t, useLang } from "@/lib/i18n";
