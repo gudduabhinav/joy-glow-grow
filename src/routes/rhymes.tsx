@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState, useMemo } from "react";
+import { useState } from "react";
+
 import { haptic, pop } from "@/lib/audio";
 import { useLang } from "@/lib/i18n";
 
@@ -22,6 +23,8 @@ interface Rhyme {
   bgGradient: string;
   floatingEmojis: string[];
   youtubeId: string;
+  startSec: number; // skip channel intro
+  endSec: number;   // stop before end-screen ads
 }
 
 const RHYMES_DATA: Rhyme[] = [
@@ -33,7 +36,8 @@ const RHYMES_DATA: Rhyme[] = [
     lang: "en",
     bgGradient: "bg-gradient-abc",
     floatingEmojis: ["👶", "🍬", "🍭", "😀"],
-    youtubeId: "m-bw5zcn5hg"
+    youtubeId: "m-bw5zcn5hg",
+    startSec: 10, endSec: 188
   },
   {
     id: "machli",
@@ -43,7 +47,8 @@ const RHYMES_DATA: Rhyme[] = [
     lang: "hi",
     bgGradient: "bg-gradient-animals",
     floatingEmojis: ["🐟", "🌊", "💧", "🐠"],
-    youtubeId: "F72r2aU0NW8"
+    youtubeId: "F72r2aU0NW8",
+    startSec: 10, endSec: 163
   },
   {
     id: "twinkle",
@@ -53,7 +58,8 @@ const RHYMES_DATA: Rhyme[] = [
     lang: "en",
     bgGradient: "bg-gradient-numbers",
     floatingEmojis: ["⭐", "✨", "🌟", "🌙"],
-    youtubeId: "5HRrKZQxaXo"
+    youtubeId: "5HRrKZQxaXo",
+    startSec: 10, endSec: 143
   },
   {
     id: "chanda",
@@ -63,7 +69,8 @@ const RHYMES_DATA: Rhyme[] = [
     lang: "hi",
     bgGradient: "bg-gradient-shapes",
     floatingEmojis: ["🌙", "⭐", "🥣", "🍯"],
-    youtubeId: "7iVIJDKHhDU"
+    youtubeId: "7iVIJDKHhDU",
+    startSec: 10, endSec: 148
   },
   {
     id: "kathi",
@@ -73,7 +80,8 @@ const RHYMES_DATA: Rhyme[] = [
     lang: "hi",
     bgGradient: "bg-gradient-colors",
     floatingEmojis: ["🐴", "🔨", "🪵", "🏃"],
-    youtubeId: "uT0KgOrFwdA"
+    youtubeId: "uT0KgOrFwdA",
+    startSec: 10, endSec: 158
   },
   {
     id: "naani",
@@ -83,7 +91,8 @@ const RHYMES_DATA: Rhyme[] = [
     lang: "hi",
     bgGradient: "bg-gradient-tracing",
     floatingEmojis: ["🦚", "🦜", "🌸", "🎶"],
-    youtubeId: "VI5N37BqwwI"
+    youtubeId: "VI5N37BqwwI",
+    startSec: 10, endSec: 153
   },
   {
     id: "tamatar",
@@ -93,7 +102,8 @@ const RHYMES_DATA: Rhyme[] = [
     lang: "hi",
     bgGradient: "bg-gradient-abc",
     floatingEmojis: ["🍅", "🥕", "🧅", "🥦"],
-    youtubeId: "GeVTkEq4pDs"
+    youtubeId: "GeVTkEq4pDs",
+    startSec: 10, endSec: 177
   },
   {
     id: "roti",
@@ -103,7 +113,8 @@ const RHYMES_DATA: Rhyme[] = [
     lang: "hi",
     bgGradient: "bg-gradient-numbers",
     floatingEmojis: ["🫓", "💰", "👩‍🍳", "😋"],
-    youtubeId: "7BLC80zJQk4"
+    youtubeId: "7BLC80zJQk4",
+    startSec: 10, endSec: 128
   },
   {
     id: "aloo",
@@ -113,95 +124,67 @@ const RHYMES_DATA: Rhyme[] = [
     lang: "hi",
     bgGradient: "bg-gradient-shapes",
     floatingEmojis: ["🥔", "🧆", "😄", "🍽️"],
-    youtubeId: "5iGi3JpU6h0"
+    youtubeId: "5iGi3JpU6h0",
+    startSec: 10, endSec: 143
   },
 ];
 
 function Rhymes() {
   const lang = useLang();
   const [selected, setSelected] = useState<Rhyme | null>(null);
-  const [burst, setBurst] = useState(0);
 
   function handleClose() {
     setSelected(null);
   }
 
-  useEffect(() => {
-    return () => { /* cleanup */ };
-  }, []);
-
-  const particles = useMemo(() => {
-    if (!selected) return [];
-    return Array.from({ length: 10 }, (_, i) => ({
-      id: `${burst}-${i}`,
-      x: Math.sin(i * 1.5) * 90 + (Math.random() - 0.5) * 30,
-      y: Math.cos(i * 1.5) * 90 + (Math.random() - 0.5) * 30,
-      emoji: selected.floatingEmojis[i % selected.floatingEmojis.length]
-    }));
-  }, [selected, burst]);
-
   return (
     <main className="min-h-screen bg-gradient-rhymes flex flex-col select-none">
       {selected ? (
-        <div className={`fixed inset-0 z-50 ${selected.bgGradient} flex flex-col p-5 animate-pop-in`}>
-          <header className="flex items-center justify-between">
+        <div className={`fixed inset-0 z-50 ${selected.bgGradient} flex flex-col animate-pop-in`}>
+          {/* Compact header */}
+          <header className="flex items-center gap-3 px-4 pt-5 pb-3 flex-shrink-0">
             <button
               type="button"
               onClick={handleClose}
-              className="rounded-full bg-white/90 size-14 flex items-center justify-center shadow-pop text-2xl active:scale-95"
+              className="rounded-full bg-white/90 size-11 flex items-center justify-center shadow-pop text-xl active:scale-95 flex-shrink-0"
               aria-label="Back"
             >
               ⬅️
             </button>
-            <h1 className={`text-xl font-extrabold text-white drop-shadow-sm text-center flex-1 px-2 ${selected.lang === "hi" ? "font-hindi" : ""}`}>
+            <h1 className={`flex-1 text-lg font-extrabold text-white drop-shadow-sm leading-tight ${selected.lang === "hi" ? "font-hindi" : ""}`}>
               {lang === "hi" ? selected.titleHi : selected.title}
             </h1>
-            <span className="size-14" />
           </header>
 
-          <section className="flex-1 flex flex-col items-center justify-start pt-4 px-0 relative overflow-y-auto">
-            {/* Particle splash */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              {particles.map((p) => (
-                <span
-                  key={p.id}
-                  className="absolute text-3xl animate-float-y"
-                  style={{
-                    transform: `translate(${p.x}px, ${p.y}px)`,
-                    animationDelay: `${parseInt(p.id.split("-")[1]) * 150}ms`
-                  }}
-                >
-                  {p.emoji}
-                </span>
-              ))}
+          {/* Video fills all remaining height */}
+          <div className="flex-1 px-3 pb-3 flex flex-col min-h-0">
+            <div className="flex-1 relative rounded-3xl overflow-hidden bg-black shadow-pop min-h-0">
+              <iframe
+                key={selected.youtubeId}
+                src={`https://www.youtube.com/embed/${selected.youtubeId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&start=${selected.startSec}&end=${selected.endSec}`}
+                title={selected.title}
+                className="absolute inset-0 w-full h-full"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
             </div>
 
-            {/* YouTube Video Embed — full width, autoplay */}
-            <div className="w-full bg-black rounded-3xl overflow-hidden shadow-pop animate-pop-in">
-              <div className="relative aspect-video w-full">
-                <iframe
-                  key={selected.youtubeId}
-                  src={`https://www.youtube.com/embed/${selected.youtubeId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
-                  title={selected.title}
-                  className="absolute inset-0 w-full h-full"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                />
+            {/* Compact info strip at bottom */}
+            <div className="mt-2 bg-white/90 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-pop flex-shrink-0">
+              <span className="text-3xl">{selected.emoji}</span>
+              <div className="flex-1 min-w-0">
+                <p className={`font-extrabold text-slate-800 text-sm leading-tight truncate ${selected.lang === "hi" ? "font-hindi" : ""}`}>
+                  {lang === "hi" ? selected.titleHi : selected.title}
+                </p>
+                <p className="text-xs text-slate-400 font-semibold mt-0.5">
+                  {selected.lang === "hi" ? "Hindi Song • हिंदी गाना" : "English Rhyme"}
+                </p>
               </div>
             </div>
-
-            {/* Title card below video */}
-            <div className="mt-3 w-full bg-white/90 rounded-2xl px-5 py-3 shadow-pop text-center animate-pop-in">
-              <p className={`text-2xl font-extrabold text-slate-800 ${selected.lang === "hi" ? "font-hindi" : ""}`}>
-                {lang === "hi" ? selected.titleHi : selected.title}
-              </p>
-              <p className="text-xs font-bold text-slate-400 mt-1">
-                {selected.lang === "hi" ? "Hindi Song • हिंदी गाना" : "English Rhyme"}
-              </p>
-            </div>
-          </section>
+          </div>
         </div>
+
       ) : (
         <>
           <header className="flex items-center justify-between px-5 pt-6">
@@ -229,7 +212,6 @@ function Rhymes() {
                   onClick={() => {
                     haptic(15);
                     pop();
-                    setBurst((b) => b + 1);
                     setSelected(rhyme);
                   }}
                   className="w-full rounded-[28px] p-4 shadow-pop flex items-center justify-between text-left active:scale-[0.97] transition-transform bg-white border border-slate-100 animate-pop-in"

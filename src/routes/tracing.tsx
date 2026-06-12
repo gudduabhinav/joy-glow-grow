@@ -72,80 +72,51 @@ function samplePathPoints(pathString: string, count = 60): { x: number; y: numbe
   }
 }
 
-// TracingDemo renders a large animated preview that shows:
-// 1. The letter in a textbook font (light gray fill) as background
-// 2. A dotted dashed outline of the approximate path
-// 3. An animated rainbow stroke tracing over it
-// 4. A pencil emoji following the stroke in real time
+// TracingDemo — letter reveals from top-to-bottom (mimics real writing direction).
+// Ghost letter in background shows the full shape; colored letter animates in.
 function TracingDemo({ item }: { item: string }) {
-  const path = CHARACTER_PATHS[item] || "M 20,50 L 80,50";
   const isHindi = /[\u0900-\u097F]/.test(item);
   const fontFamily = isHindi ? "'Baloo 2', system-ui, sans-serif" : "'Fredoka', system-ui, sans-serif";
+  const fontSize = isHindi ? 52 : 56;
 
   return (
-    <div className="relative bg-white border-2 border-purple-200 rounded-3xl overflow-hidden shadow-pop animate-pop-in"
-         style={{ width: 90, height: 90 }}>
-      <svg viewBox="0 0 100 100" width="90" height="90">
-        <defs>
-          <linearGradient id="rainbow-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#ff7ab6" />
-            <stop offset="50%" stopColor="#ffbe3b" />
-            <stop offset="100%" stopColor="#4d9dff" />
-          </linearGradient>
-        </defs>
+    <div
+      className="relative bg-white border-2 border-purple-200 rounded-3xl overflow-hidden shadow-pop animate-pop-in flex items-center justify-center"
+      style={{ width: 90, height: 90, flexShrink: 0 }}
+    >
+      {/* Ghost letter — full shape, always visible in light gray */}
+      <span
+        className="absolute select-none leading-none"
+        aria-hidden
+        style={{ fontFamily, fontWeight: 800, fontSize, color: "#e2e8f0" }}
+      >
+        {item}
+      </span>
 
-        {/* Letter in textbook font — large, solid light gray in the background */}
-        <text
-          x="50"
-          y="52"
-          textAnchor="middle"
-          dominantBaseline="central"
-          fill="#e2e8f0"
-          fontWeight="800"
-          fontSize={isHindi ? 70 : 65}
-          fontFamily={fontFamily}
-        >
-          {item}
-        </text>
+      {/* Colored letter that wipes in top-to-bottom */}
+      <span
+        className="relative select-none leading-none animate-write-reveal"
+        aria-hidden
+        style={{
+          fontFamily,
+          fontWeight: 800,
+          fontSize,
+          background: "linear-gradient(160deg, #ff7ab6 0%, #ffbe3b 55%, #4d9dff 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+        }}
+      >
+        {item}
+      </span>
 
-        {/* Dotted guidance path */}
-        <path d={path} fill="none" stroke="#e2e8f0" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
-        <path d={path} fill="none" stroke="#a78bfa" strokeWidth="5" strokeDasharray="5 9" strokeLinecap="round" strokeLinejoin="round" />
-
-        {/* Animated rainbow stroke — draws and pauses */}
-        <path
-          d={path}
-          pathLength="300"
-          fill="none"
-          stroke="url(#rainbow-grad)"
-          strokeWidth="9"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeDasharray="300"
-          strokeDashoffset="300"
-        >
-          <animate
-            attributeName="stroke-dashoffset"
-            values="300;0;0;300"
-            keyTimes="0;0.65;0.9;1"
-            dur="4s"
-            repeatCount="indefinite"
-          />
-        </path>
-
-        {/* Pencil emoji that follows the animated stroke */}
-        <g>
-          <animateMotion
-            dur="4s"
-            repeatCount="indefinite"
-            path={path}
-            keyPoints="0;1;1;0"
-            keyTimes="0;0.65;0.9;1"
-            calcMode="linear"
-          />
-          <text fontSize="14" x="-7" y="7">✏️</text>
-        </g>
-      </svg>
+      {/* Pencil that slides down in sync with the reveal */}
+      <span
+        className="absolute right-1 text-sm animate-pencil-trace"
+        aria-hidden
+        style={{ position: "absolute" }}
+      >
+        ✏️
+      </span>
     </div>
   );
 }
@@ -175,27 +146,48 @@ function Tracing() {
   useEffect(() => {
     const c = canvasRef.current;
     if (!c) return;
-    const dpr = window.devicePixelRatio || 1;
-    const rect = c.getBoundingClientRect();
-    c.width = rect.width * dpr;
-    c.height = rect.height * dpr;
-    const ctx = c.getContext("2d");
-    if (!ctx) return;
-    ctx.scale(dpr, dpr);
+    let rafId: number;
 
-    const redraw = () => {
-      if (canvasRef.current) {
-        const cCtx = canvasRef.current.getContext("2d");
-        if (cCtx) drawGuide(cCtx, rect.width, rect.height, item);
+    // Wait until the canvas has actual dimensions (flex-1 layout may not resolve immediately)
+    function init() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = c!.getBoundingClientRect();
+      if (rect.width < 1 || rect.height < 1) {
+        rafId = requestAnimationFrame(init);
+        return;
       }
-    };
+      c!.width = Math.round(rect.width * dpr);
+      c!.height = Math.round(rect.height * dpr);
+      const ctx = c!.getContext("2d");
+      if (!ctx) return;
+      ctx.scale(dpr, dpr);
+      drawGuide(ctx, rect.width, rect.height, item);
 
-    redraw();
-
-    // Redraw once custom fonts are loaded to avoid raw system fallback rendering
-    if (typeof document !== "undefined" && "fonts" in document) {
-      document.fonts.ready.then(redraw);
+      // Redraw once fonts are loaded (avoids system-font fallback on first paint)
+      if (typeof document !== "undefined" && "fonts" in document) {
+        document.fonts.ready.then(() => {
+          const ctx2 = c!.getContext("2d");
+          const r2 = c!.getBoundingClientRect();
+          if (ctx2 && r2.width > 1) drawGuide(ctx2, r2.width, r2.height, item);
+        });
+      }
     }
+
+    rafId = requestAnimationFrame(init);
+
+    // Redraw on resize / orientation change
+    const ro = new ResizeObserver(() => {
+      const ctx = c.getContext("2d");
+      const r = c.getBoundingClientRect();
+      if (ctx && r.width > 1 && r.height > 1) {
+        const dpr = window.devicePixelRatio || 1;
+        c.width = Math.round(r.width * dpr);
+        c.height = Math.round(r.height * dpr);
+        ctx.scale(dpr, dpr);
+        drawGuide(ctx, r.width, r.height, item);
+      }
+    });
+    ro.observe(c);
 
     // Reset validation tracking refs
     hitsRef.current = new Array(targetPoints.length).fill(false);
@@ -206,7 +198,13 @@ function Tracing() {
     const isNumber = /[0-9०-९१२३४५६७८९]/.test(item);
     if (lang === "hi") speak(isNumber ? `अंक ${item} लिखो` : `अक्षर ${item} लिखो`);
     else speak(`Trace the ${isNumber ? "number" : "letter"} ${item}`);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      ro.disconnect();
+    };
   }, [item, lang, targetPoints]);
+
 
   function drawGuide(ctx: CanvasRenderingContext2D, w: number, h: number, ch: string) {
     ctx.clearRect(0, 0, w, h);

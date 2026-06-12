@@ -168,6 +168,27 @@
   animation: draw-svg-path 3.2s ease-in-out infinite;
 }
 
+@keyframes write-reveal {
+  0%, 3%  { clip-path: inset(0 0 100% 0 round 4px); }
+  65%     { clip-path: inset(0 0 0%   0 round 4px); }
+  88%     { clip-path: inset(0 0 0%   0 round 4px); }
+  100%    { clip-path: inset(0 0 100% 0 round 4px); }
+}
+.animate-write-reveal {
+  animation: write-reveal 3s cubic-bezier(.4,0,.6,1) infinite;
+}
+
+@keyframes pencil-trace {
+  0%, 3%  { top: 8%;  opacity: 1; }
+  65%     { top: 80%; opacity: 1; }
+  88%     { top: 80%; opacity: 0; }
+  89%     { top: 8%;  opacity: 0; }
+  100%    { top: 8%;  opacity: 1; }
+}
+.animate-pencil-trace {
+  animation: pencil-trace 3s cubic-bezier(.4,0,.6,1) infinite;
+}
+
 .font-hindi {
   font-family: "Baloo 2", "Fredoka", system-ui, sans-serif;
 }
