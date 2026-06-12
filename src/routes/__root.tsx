@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { PWAInstallBanner } from "../components/PWAInstallBanner";
 
 function NotFoundComponent() {
   return (
@@ -116,11 +117,10 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
-  // Register the offline service worker (PWA). Production-safe; ignored in dev.
+  // Register service worker — both dev and prod for PWA install to work
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!("serviceWorker" in navigator)) return;
-    if (!import.meta.env.PROD) return;
     const onLoad = () => {
       navigator.serviceWorker.register("/sw.js").catch(() => { /* offline ok */ });
     };
@@ -130,8 +130,8 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <PWAInstallBanner />
     </QueryClientProvider>
   );
 }

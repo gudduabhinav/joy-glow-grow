@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { speak, pop, chime, haptic } from "@/lib/audio";
 import { addStars } from "@/lib/progress";
 import { t, useLang, ANIMALS_DATA } from "@/lib/i18n";
@@ -17,22 +17,45 @@ export const Route = createFileRoute("/sound-match")({
 
 function SoundMatch() {
   const lang = useLang();
-  const [level, setLevel] = useState(0);
   const [score, setScore] = useState(0);
-  const animals = useMemo(() => ANIMALS_DATA.sort(() => Math.random() - 0.5).slice(0, 4), []);
-  const current = animals[Math.floor(Math.random() * animals.length)];
   const [played, setPlayed] = useState(false);
+  const [usedIndices, setUsedIndices] = useState<number[]>([]);
+  
+  // Shuffle animals once on mount
+  const allAnimalsShuffled = useMemo(() => 
+    ANIMALS_DATA.sort(() => Math.random() - 0.5), 
+    []
+  );
+
+  // Get 4 random animals that haven't been used yet
+  const getNewRound = () => {
+    let available = allAnimalsShuffled.filter((_, idx) => !usedIndices.includes(idx));
+    if (available.length < 4) {
+      // Reset if we've gone through all
+      setUsedIndices([]);
+      available = allAnimalsShuffled;
+    }
+    return available.slice(0, 4).sort(() => Math.random() - 0.5);
+  };
+
+  const [animals, setAnimals] = useState(getNewRound());
+  const [current, setCurrent] = useState(animals[Math.floor(Math.random() * animals.length)]);
 
   const handleCorrect = (id: string) => {
     if (id === current.id) {
       haptic();
       chime();
       speak(t("correct", lang));
-      const stars = addStars(5);
+      addStars(5);
       setScore((s) => s + 1);
+      
+      // Move to next question
       setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+        const newAnimals = getNewRound();
+        setAnimals(newAnimals);
+        setCurrent(newAnimals[Math.floor(Math.random() * newAnimals.length)]);
+        setPlayed(false);
+      }, 800);
     } else {
       pop();
       speak(t("tryAgain", lang));

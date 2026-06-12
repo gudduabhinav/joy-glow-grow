@@ -41,6 +41,26 @@ const ALL_NUMBERS = [
 ];
 
 const TABLE_EMOJIS = ["🍎","🌟","🐱","🍌","🌸","🎈","🍓","🦋","🐢","🐬"];
+
+// Traditional Hindi table words: एकम, दूनी, तिया, चौके, पंचे, छक्के, सत्ते, अट्ठे, नौवे, दहिये
+const HI_MULTIPLIER = ["एकम","दूनी","तिया","चौके","पंचे","छक्के","सत्ते","अट्ठे","नौवे","दहिये"];
+
+// Traditional English ordinal words: ones, twos, threes, fours...
+const EN_MULTIPLIER = ["ones","twos","threes","fours","fives","sixes","sevens","eights","nines","tens"];
+
+// All Hindi results up to 100 for speaking
+const HI_NUMBERS_100: Record<number, string> = {
+  1:"एक",2:"दो",3:"तीन",4:"चार",5:"पाँच",6:"छह",7:"सात",8:"आठ",9:"नौ",10:"दस",
+  11:"ग्यारह",12:"बारह",13:"तेरह",14:"चौदह",15:"पंद्रह",16:"सोलह",17:"सत्रह",18:"अठारह",19:"उन्नीस",20:"बीस",
+  21:"इक्कीस",22:"बाईस",23:"तेईस",24:"चौबीस",25:"पच्चीस",26:"छब्बीस",27:"सत्ताईस",28:"अट्ठाईस",29:"उनतीस",30:"तीस",
+  31:"इकतीस",32:"बत्तीस",33:"तैंतीस",34:"चौंतीस",35:"पैंतीस",36:"छत्तीस",37:"सैंतीस",38:"अड़तीस",39:"उनतालीस",40:"चालीस",
+  41:"इकतालीस",42:"बयालीस",43:"तैंतालीस",44:"चौवालीस",45:"पैंतालीस",46:"छियालीस",47:"सैंतालीस",48:"अड़तालीस",49:"उनचास",50:"पचास",
+  51:"इक्यावन",52:"बावन",53:"तिरपन",54:"चौवन",55:"पचपन",56:"छप्पन",57:"सत्तावन",58:"अट्ठावन",59:"उनसठ",60:"साठ",
+  61:"इकसठ",62:"बासठ",63:"तिरसठ",64:"चौंसठ",65:"पैंसठ",66:"छियासठ",67:"सड़सठ",68:"अड़सठ",69:"उनहत्तर",70:"सत्तर",
+  71:"इकहत्तर",72:"बहत्तर",73:"तिहत्तर",74:"चौहत्तर",75:"पचहत्तर",76:"छिहत्तर",77:"सतहत्तर",78:"अठहत्तर",79:"उनासी",80:"अस्सी",
+  81:"इक्यासी",82:"बयासी",83:"तिरासी",84:"चौरासी",85:"पचासी",86:"छियासी",87:"सत्तासी",88:"अट्ठासी",89:"नवासी",90:"नब्बे",
+  91:"इक्यानवे",92:"बानवे",93:"तिरानवे",94:"चौरानवे",95:"पचानवे",96:"छियानवे",97:"सत्तानवे",98:"अट्ठानवे",99:"निन्यानवे",100:"सौ",
+};
 type Tab = "learn" | "count" | "table";
 
 // ─── Learn Tab ───────────────────────────────────────────────────────────────
@@ -150,19 +170,18 @@ function CountingTab({ lang }: { lang: "en" | "hi" }) {
 
   useEffect(() => {
     setCount(0);
-    speak(lang === "hi"
-      ? `${item.hi} तक गिनो!`
-      : `Count to ${item.en}!`);
+    speak(lang === "hi" ? `${item.hi} तक गिनो!` : `Count to ${item.en}!`);
   }, [target, lang]);
 
-  function tapEmoji() {
-    if (count >= target) return;
+  function tapEmoji(i: number) {
+    // only allow tapping the next item in sequence
+    if (i !== count) return;
     haptic(10); pop();
     const next = count + 1;
     setCount(next);
     speak(lang === "hi" ? ALL_NUMBERS[next - 1].hi : String(next));
     if (next === target) {
-      setTimeout(() => { chime(); haptic(40); speak(lang === "hi" ? "शाबाश! 🎉" : "Well done! 🎉"); }, 200);
+      setTimeout(() => { chime(); haptic(40); speak(lang === "hi" ? "शाबाश!" : "Well done!"); }, 200);
     }
   }
 
@@ -186,36 +205,78 @@ function CountingTab({ lang }: { lang: "en" | "hi" }) {
       </div>
 
       {/* Counter display */}
-      <div className="bg-white/95 rounded-3xl px-8 py-4 shadow-pop text-center mb-4 w-full max-w-sm">
-        <p className="text-sm font-bold text-muted-foreground">
-          {lang === "hi" ? "अभी तक" : "So far"}
+      <div className="bg-white/95 rounded-3xl px-6 py-3 shadow-pop text-center mb-4 w-full max-w-sm">
+        <p className="text-4xl font-black bg-gradient-hero bg-clip-text text-transparent leading-none">
+          {count === 0 ? "0" : (lang === "hi" ? ALL_NUMBERS[count - 1].hiNum : count)}
         </p>
-        <p className="text-6xl font-black bg-gradient-hero bg-clip-text text-transparent leading-none mt-1">
-          {lang === "hi" ? ALL_NUMBERS[Math.max(count - 1, 0)].hiNum : count}
-        </p>
-        <p className="text-base font-bold text-slate-500 mt-1">
-          {count === 0 ? (lang === "hi" ? "छुओ शुरू करो!" : "Tap to start!") : (lang === "hi" ? ALL_NUMBERS[count - 1].hi : ALL_NUMBERS[count - 1].en)}
+        <p className="text-sm font-bold text-slate-500 mt-0.5">
+          {count === 0
+            ? (lang === "hi" ? "नीचे जानवर छुओ!" : "Tap the animal below!")
+            : (lang === "hi" ? ALL_NUMBERS[count - 1].hi : ALL_NUMBERS[count - 1].en)}
         </p>
         {count === target && (
-          <p className="text-green-500 font-extrabold mt-1 animate-pop-in">
+          <p className="text-green-500 font-extrabold mt-1 animate-pop-in text-base">
             {lang === "hi" ? "🎉 शाबाश!" : "🎉 Amazing!"}
           </p>
         )}
       </div>
 
-      {/* Emoji grid — tap to count */}
-      <div className="flex flex-wrap justify-center gap-2 max-w-sm w-full">
+      {/* Emoji grid */}
+      <div className="flex flex-wrap justify-center gap-3 max-w-sm w-full">
         {Array.from({ length: target }).map((_, i) => {
-          const filled = i < count;
+          const tapped   = i < count;       // already counted
+          const isNext   = i === count;     // THIS one should be tapped next
+          const upcoming = i > count;       // not yet reached
+
           return (
-            <button
-              key={i} type="button" onClick={tapEmoji}
-              className={`text-3xl transition-all duration-200 rounded-2xl p-1 active:scale-95 ${filled ? "opacity-100 animate-pop-in" : "opacity-30 grayscale"}`}
-              style={{ animationDelay: `${i * 40}ms` }}
-              aria-label={`Item ${i + 1}`}
-            >
-              {item.emoji}
-            </button>
+            <div key={i} className="relative flex flex-col items-center">
+              {/* Bouncing finger pointer on the next item */}
+              {isNext && count < target && (
+                <span
+                  className="absolute top-2 text-xl z-10 pointer-events-none"
+                  style={{ animation: "float-y 0.8s ease-in-out infinite" }}
+                >
+                  👆
+                </span>
+              )}
+
+              <button
+                type="button"
+                onClick={() => tapEmoji(i)}
+                aria-label={`Item ${i + 1}`}
+                className={`
+                  relative text-4xl rounded-2xl p-2 transition-all duration-200
+                  ${tapped
+                    ? "opacity-100 scale-100"
+                    : isNext
+                      ? "opacity-100 scale-110 active:scale-95"
+                      : "opacity-25 grayscale scale-90"
+                  }
+                `}
+                style={isNext ? {
+                  animation: "bounce-big 0.7s ease-in-out infinite",
+                  filter: "drop-shadow(0 0 10px rgba(255,200,0,0.9))",
+                } : undefined}
+              >
+                {/* Green checkmark overlay when tapped */}
+                {tapped && (
+                  <span
+                    className="absolute -top-1 -right-1 text-base leading-none z-10"
+                    style={{ animation: "pop-in 0.3s cubic-bezier(.34,1.56,.64,1) both" }}
+                  >
+                    ✅
+                  </span>
+                )}
+                {item.emoji}
+              </button>
+
+              {/* Number under each tapped item */}
+              {tapped && (
+                <span className="text-xs font-extrabold text-white mt-0.5">
+                  {lang === "hi" ? ALL_NUMBERS[i].hiNum : i + 1}
+                </span>
+              )}
+            </div>
           );
         })}
       </div>
@@ -234,33 +295,33 @@ function TablesTab({ lang }: { lang: "en" | "hi" }) {
   const [tableOf, setTableOf] = useState(2);
   const [revealed, setRevealed] = useState(0);
   const emoji = TABLE_EMOJIS[tableOf - 1];
+  const tableName = ALL_NUMBERS[tableOf - 1];
 
   useEffect(() => {
     setRevealed(0);
-    speak(lang === "hi"
-      ? `${ALL_NUMBERS[tableOf - 1].hi} का पहाड़ा`
-      : `Table of ${tableOf}`);
+    speak(lang === "hi" ? `${tableName.hi} का पहाड़ा` : `Table of ${tableOf}`);
   }, [tableOf, lang]);
+
+  // Speak in traditional format
+  function speakRow(step: number) {
+    const result = tableOf * step;
+    const resultHi = HI_NUMBERS_100[result] ?? String(result);
+    if (lang === "hi") {
+      // दो एकम दो | दो दूनी चार | दो तिया छह
+      speak(`${tableName.hi} ${HI_MULTIPLIER[step - 1]} ${resultHi}`);
+    } else {
+      // two ones are 2 | two twos are 4 | two threes are 6
+      speak(`${tableName.en} ${EN_MULTIPLIER[step - 1]} are ${result}`);
+    }
+  }
 
   function revealNext() {
     if (revealed >= 10) return;
     const next = revealed + 1;
     setRevealed(next);
     haptic(10); pop();
-    const result = tableOf * next;
-    const resultItem = ALL_NUMBERS[result - 1];
-    if (lang === "hi") {
-      speak(`${ALL_NUMBERS[tableOf - 1].hi} गुना ${ALL_NUMBERS[next - 1].hi} बराबर ${resultItem?.hi ?? result}`);
-    } else {
-      speak(`${tableOf} times ${next} equals ${result}`);
-    }
-    if (next === 10) { setTimeout(() => { chime(); haptic(50); }, 300); }
-  }
-
-  function toHindi(n: number): string {
-    if (n <= 20) return ALL_NUMBERS[n - 1]?.hiNum ?? String(n);
-    // for results > 20, just return the number
-    return String(n);
+    speakRow(next);
+    if (next === 10) { setTimeout(() => { chime(); haptic(50); }, 400); }
   }
 
   return (
@@ -284,30 +345,42 @@ function TablesTab({ lang }: { lang: "en" | "hi" }) {
       <div className="w-full max-w-sm space-y-2 overflow-y-auto" style={{ maxHeight: "52vh" }}>
         {Array.from({ length: 10 }, (_, i) => i + 1).map((step) => {
           const result = tableOf * step;
+          const resultHi = HI_NUMBERS_100[result] ?? String(result);
           const visible = step <= revealed;
+
+          // Display text
+          const leftEn = `${tableName.en} ${EN_MULTIPLIER[step - 1]}`;
+          const leftHi = `${tableName.hi} ${HI_MULTIPLIER[step - 1]}`;
+          const rightEn = String(result);
+          const rightHi = resultHi;
+
           return (
             <button
               key={step} type="button"
-              onClick={visible ? undefined : revealNext}
-              disabled={visible}
+              onClick={visible ? () => speakRow(step) : revealNext}
               className={`w-full rounded-2xl px-4 py-3 flex items-center justify-between shadow-pop transition-all active:scale-[0.98]
-                ${visible ? "bg-white" : "bg-white/30 cursor-pointer"}`}
-              aria-label={`${tableOf} × ${step}`}
+                ${visible ? "bg-white" : "bg-white/30"}`}
+              aria-label={`${tableOf} x ${step}`}
             >
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">{emoji}</span>
-                <span className="text-xl font-extrabold text-slate-800">
-                  {lang === "hi"
-                    ? `${toHindi(tableOf)} × ${toHindi(step)}`
-                    : `${tableOf} × ${step}`}
-                </span>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span className="text-xl flex-shrink-0">{emoji}</span>
+                <div className="flex flex-col items-start min-w-0">
+                  {/* Traditional reading text */}
+                  <span className={`font-extrabold text-slate-800 leading-tight truncate ${lang === "hi" ? "text-sm font-hindi" : "text-sm"}`}>
+                    {lang === "hi" ? leftHi : leftEn}
+                  </span>
+                  {/* Numeric equation in small */}
+                  <span className="text-xs text-slate-400 font-semibold">
+                    {tableOf} &times; {step} = {result}
+                  </span>
+                </div>
               </div>
               {visible ? (
-                <span className="text-2xl font-black text-primary">
-                  = {lang === "hi" ? (toHindi(result)) : result}
+                <span className="text-xl font-black text-primary ml-2 flex-shrink-0">
+                  = {lang === "hi" ? rightHi : rightEn}
                 </span>
               ) : (
-                <span className="text-white font-extrabold text-base px-3 py-1 bg-white/40 rounded-full">
+                <span className="text-white font-extrabold text-xs px-2 py-1 bg-white/40 rounded-full flex-shrink-0">
                   {lang === "hi" ? "छुओ" : "Tap"}
                 </span>
               )}
@@ -323,12 +396,10 @@ function TablesTab({ lang }: { lang: "en" | "hi" }) {
         </button>
       )}
       {revealed === 10 && (
-        <div className="mt-4 flex gap-3">
+        <div className="mt-4 flex items-center gap-3">
           <p className="text-white font-extrabold text-lg animate-pop-in">🎉 {lang === "hi" ? "पहाड़ा पूरा!" : "Table done!"}</p>
           <button type="button" onClick={() => setRevealed(0)}
-            className="bg-white/30 text-white font-bold px-4 py-2 rounded-full active:scale-95">
-            🔄
-          </button>
+            className="bg-white/30 text-white font-bold px-4 py-2 rounded-full active:scale-95">🔄</button>
         </div>
       )}
     </div>
