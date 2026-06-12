@@ -116,6 +116,43 @@ function TracingDemo({ item }: { item: string }) {
     </div>
   );
 }
+
+function Tracing() {
+  const lang = useLang();
+  const ITEMS = lang === "hi" ? HI_ITEMS : EN_ITEMS;
+  const [idx, setIdx] = useState(0);
+  const [celebrate, setCelebrate] = useState(false);
+  const item = ITEMS[idx % ITEMS.length];
+
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const drawingRef = useRef(false);
+  const lastRef = useRef<{ x: number; y: number } | null>(null);
+
+  const targetPoints = useMemo(() => {
+    const pStr = CHARACTER_PATHS[item];
+    if (!pStr) return [];
+    return samplePathPoints(pStr, 60);
+  }, [item]);
+
+  const hitsRef = useRef<boolean[]>([]);
+  const totalUserPointsRef = useRef(0);
+  const offPathPointsRef = useRef(0);
+
+  // Reset index when language switches (avoid stale slot)
+  useEffect(() => { setIdx(0); }, [lang]);
+
+  useEffect(() => {
+    const c = canvasRef.current;
+    if (!c) return;
+    let rafId: number;
+
+    function init() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = c!.getBoundingClientRect();
+      if (rect.width < 1 || rect.height < 1) {
+        rafId = requestAnimationFrame(init);
+        return;
+      }
       c!.width = Math.round(rect.width * dpr);
       c!.height = Math.round(rect.height * dpr);
       const ctx = c!.getContext("2d");
