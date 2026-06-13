@@ -96,10 +96,9 @@ function MadamPage() {
       if (text.trim()) void sendToMadam(text.trim());
     };
     r.onerror = () => setStatus("idle");
-    r.onend = () => {
-      if (status === "listening") setStatus("idle");
-    };
+    r.onend = () => setStatus((s) => (s === "listening" ? "idle" : s));
     recRef.current = r;
+
     setStatus("listening");
     try {
       r.start();
