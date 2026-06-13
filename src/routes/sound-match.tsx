@@ -4,6 +4,8 @@ import { speak, pop, chime, haptic } from "@/lib/audio";
 import { addStars } from "@/lib/progress";
 import { t, useLang, ANIMALS_DATA } from "@/lib/i18n";
 import { LangToggle } from "@/components/LangToggle";
+import { LevelPicker, type Level } from "@/components/LevelPicker";
+import { celebrate } from "@/lib/celebrate";
 
 export const Route = createFileRoute("/sound-match")({
   head: () => ({
@@ -15,57 +17,78 @@ export const Route = createFileRoute("/sound-match")({
   component: SoundMatch,
 });
 
+const ROUND_BY_LEVEL: Record<Level, { choices: number; rounds: number; stars: number }> = {
+  easy: { choices: 3, rounds: 5, stars: 3 },
+  medium: { choices: 4, rounds: 7, stars: 5 },
+  hard: { choices: 6, rounds: 10, stars: 8 },
+};
+
+function shuffle<T>(arr: T[]): T[] { return [...arr].sort(() => Math.random() - 0.5); }
+
 function SoundMatch() {
   const lang = useLang();
+  const [level, setLevel] = useState<Level>("easy");
   const [score, setScore] = useState(0);
-  const [played, setPlayed] = useState(false);
-  const [usedIndices, setUsedIndices] = useState<number[]>([]);
-  
-  // Shuffle animals once on mount
-  const allAnimalsShuffled = useMemo(() => 
-    ANIMALS_DATA.sort(() => Math.random() - 0.5), 
-    []
-  );
+  const [round, setRound] = useState(1);
+  const [streak, setStreak] = useState(0);
+  const [done, setDone] = useState(false);
 
-  // Get 4 random animals that haven't been used yet
-  const getNewRound = () => {
-    let available = allAnimalsShuffled.filter((_, idx) => !usedIndices.includes(idx));
-    if (available.length < 4) {
-      // Reset if we've gone through all
-      setUsedIndices([]);
-      available = allAnimalsShuffled;
-    }
-    return available.slice(0, 4).sort(() => Math.random() - 0.5);
-  };
+  const cfg = ROUND_BY_LEVEL[level];
 
-  const [animals, setAnimals] = useState(getNewRound());
-  const [current, setCurrent] = useState(animals[Math.floor(Math.random() * animals.length)]);
+  const makeRound = useMemo(() => () => {
+    const picks = shuffle(ANIMALS_DATA).slice(0, cfg.choices);
+    return { picks, target: picks[Math.floor(Math.random() * picks.length)] };
+  }, [cfg.choices]);
 
-  const handleCorrect = (id: string) => {
-    if (id === current.id) {
-      haptic();
-      chime();
-      speak(t("correct", lang));
-      addStars(5);
-      setScore((s) => s + 1);
-      
-      // Move to next question
-      setTimeout(() => {
-        const newAnimals = getNewRound();
-        setAnimals(newAnimals);
-        setCurrent(newAnimals[Math.floor(Math.random() * newAnimals.length)]);
-        setPlayed(false);
-      }, 800);
+  const [{ picks, target }, setRoundData] = useState(makeRound);
+
+  // Reset on level change
+  useEffect(() => {
+    setScore(0); setRound(1); setStreak(0); setDone(false);
+    setRoundData(makeRound());
+  }, [level, makeRound]);
+
+  const playSound = () => speak(lang === "hi" ? target.soundHi : target.soundEn);
+
+  // Auto-play sound when round changes
+  useEffect(() => { const id = setTimeout(playSound, 250); return () => clearTimeout(id); /* eslint-disable-next-line */ }, [target.id, lang]);
+
+  const handleChoice = (id: string) => {
+    if (done) return;
+    if (id === target.id) {
+      haptic(); chime();
+      const bonus = streak >= 2 ? cfg.stars * 2 : cfg.stars;
+      addStars(bonus);
+      setScore((s) => s + bonus);
+      setStreak((s) => s + 1);
+      if (round >= cfg.rounds) {
+        celebrate("big");
+        speak(t("complete", lang));
+        setDone(true);
+      } else {
+        celebrate("small");
+        setTimeout(() => { setRound((r) => r + 1); setRoundData(makeRound()); }, 700);
+      }
     } else {
-      pop();
-      speak(t("tryAgain", lang));
+      pop(); setStreak(0); speak(t("tryAgain", lang));
     }
   };
 
-  const playSound = () => {
-    setPlayed(true);
-    speak(lang === "hi" ? current.soundHi : current.soundEn);
-  };
+  if (done) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-sky/20 via-background to-grape/10 flex items-center justify-center pb-12 px-6">
+        <div className="text-center">
+          <p className="text-7xl mb-2 animate-bounce-big">🎉</p>
+          <h1 className="text-3xl font-extrabold mb-2">{t("complete", lang)}!</h1>
+          <p className="text-xl font-bold text-primary">⭐ {score}</p>
+          <div className="mt-8 flex flex-col gap-3 items-center">
+            <button onClick={() => { setScore(0); setRound(1); setStreak(0); setDone(false); setRoundData(makeRound()); }} className="rounded-2xl bg-gradient-hero text-white font-extrabold py-3 px-8 shadow-pop">🔄 {t("playAgain", lang)}</button>
+            <Link to="/" className="text-sm font-bold text-muted-foreground">🏠 {t("home", lang)}</Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-sky/20 via-background to-grape/10 pb-12">
@@ -75,37 +98,36 @@ function SoundMatch() {
         <LangToggle />
       </header>
 
-      <section className="px-4 mt-8 text-center">
-        <p className="text-lg font-bold mb-6">🎵 {t("soundMatchDesc", lang)}</p>
-        <p className="text-2xl font-extrabold text-primary mb-8">{lang === "hi" ? "स्कोर" : "Score"}: {score}</p>
+      <div className="flex justify-center mt-4">
+        <LevelPicker level={level} onChange={setLevel} />
+      </div>
+
+      <section className="px-4 mt-6 text-center">
+        <div className="flex items-center justify-center gap-4 mb-4 text-sm font-bold">
+          <span className="rounded-full bg-white/80 px-3 py-1 shadow-pop">⭐ {score}</span>
+          <span className="rounded-full bg-white/80 px-3 py-1 shadow-pop">{round}/{cfg.rounds}</span>
+          {streak >= 2 && <span className="rounded-full bg-gradient-hero text-white px-3 py-1 shadow-pop animate-pulse">🔥 x{streak}</span>}
+        </div>
 
         <button
           onClick={playSound}
-          className="mx-auto block w-20 h-20 rounded-full bg-gradient-hero text-white text-3xl shadow-pop active:scale-95 transition-transform mb-8"
-        >
-          🔊
-        </button>
-        <p className="text-sm text-muted-foreground mb-8">{played ? t("soundMatchDesc", lang) : "Tap speaker!"}</p>
+          className="mx-auto block size-24 rounded-full bg-gradient-hero text-white text-4xl shadow-pop active:scale-95 transition-transform mb-6 animate-pulse"
+          aria-label="Play sound"
+        >🔊</button>
 
-        <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto">
-          {animals.map((animal) => (
+        <div className={`grid gap-3 max-w-sm mx-auto ${cfg.choices > 4 ? "grid-cols-3" : "grid-cols-2"}`}>
+          {picks.map((animal) => (
             <button
               key={animal.id}
-              onClick={() => handleCorrect(animal.id)}
-              className="rounded-2xl bg-white/80 p-4 shadow-pop active:scale-95 transition-transform border-2 border-primary/20 hover:border-primary/50"
+              onClick={() => handleChoice(animal.id)}
+              className="rounded-2xl bg-white/90 p-4 shadow-pop active:scale-95 transition-transform border-2 border-primary/20 hover:border-primary/50"
             >
-              <div className="text-4xl mb-1">{animal.emoji}</div>
+              <div className="text-5xl mb-1">{animal.emoji}</div>
               <div className="text-xs font-bold">{lang === "hi" ? animal.hi : animal.en}</div>
             </button>
           ))}
         </div>
       </section>
-
-      <div className="mt-12 text-center">
-        <Link to="/" className="inline-flex items-center justify-center rounded-2xl bg-gradient-hero text-white font-extrabold py-3 px-8 shadow-pop">
-          🏠 {t("home", lang)}
-        </Link>
-      </div>
     </main>
   );
 }

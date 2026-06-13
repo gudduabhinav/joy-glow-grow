@@ -130,7 +130,31 @@ const D = {
   earned: { en: "Earned", hi: "कमाए" },
   newRecord: { en: "New Record!", hi: "नया रिकॉर्ड!" },
   selectProfile: { en: "Select Profile", hi: "प्रोफाइल चुनो" },
+  // Tabs
+  study: { en: "Study", hi: "पढ़ाई" },
+  play: { en: "Play", hi: "खेल" },
+  // Levels
+  levelEasy: { en: "Easy", hi: "आसान" },
+  levelMedium: { en: "Medium", hi: "मध्यम" },
+  levelHard: { en: "Hard", hi: "कठिन" },
+  level: { en: "Level", hi: "स्तर" },
+  // Madam (AI)
+  madam: { en: "AI Madam", hi: "मैडम जी" },
+  madamDesc: { en: "Chat with your loving teacher", hi: "अपनी प्यारी मैडम से बात करो" },
+  madamHello: {
+    en: "Hello sweetie! I'm Madam. Tap the big mic and talk to me ✨",
+    hi: "नमस्ते बेटू! मैं हूँ मैडम जी। बड़ा माइक छुओ और मुझसे बात करो ✨",
+  },
+  tapToTalk: { en: "Tap to talk", hi: "बोलने के लिए छुओ" },
+  listening: { en: "Listening… 👂", hi: "सुन रही हूँ… 👂" },
+  thinking: { en: "Thinking… 💭", hi: "सोच रही हूँ… 💭" },
+  speakAgain: { en: "Speak again", hi: "फिर बोलो" },
+  micNotSupported: {
+    en: "Mic not available on this device. Try Chrome on Android.",
+    hi: "इस डिवाइस पर माइक नहीं है। एंड्रॉइड पर क्रोम आज़माओ।",
+  },
 } satisfies Record<string, Dict>;
+
 
 export type TKey = keyof typeof D;
 export function t(key: TKey, lang: Lang = current): string {

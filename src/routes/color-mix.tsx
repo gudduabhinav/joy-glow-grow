@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
-import { speak, chime, haptic } from "@/lib/audio";
+import { useState, useMemo, useEffect } from "react";
+import { speak, chime, haptic, pop } from "@/lib/audio";
 import { addStars } from "@/lib/progress";
 import { t, useLang, COLORS_DATA } from "@/lib/i18n";
 import { LangToggle } from "@/components/LangToggle";
+import { LevelPicker, type Level } from "@/components/LevelPicker";
+import { celebrate } from "@/lib/celebrate";
 
 export const Route = createFileRoute("/color-mix")({
   head: () => ({
@@ -15,41 +17,59 @@ export const Route = createFileRoute("/color-mix")({
   component: ColorMix,
 });
 
-const colorMixes: { color1: string; color2: string; result: string }[] = [
-  { color1: "#FF4D4D", color2: "#FFD93D", result: "#FFB84D" }, // red + yellow = orange
-  { color1: "#4D9DFF", color2: "#FF4D4D", result: "#A66BFF" }, // blue + red = purple
-  { color1: "#FF7AB6", color2: "#FFD93D", result: "#FFA566" }, // pink + yellow = coral
+type Mix = { a: string; b: string; result: string; name: { en: string; hi: string } };
+const MIXES: Mix[] = [
+  { a: "#FF4D4D", b: "#FFD93D", result: "#FF9F43", name: { en: "Orange", hi: "नारंगी" } },
+  { a: "#4D9DFF", b: "#FF4D4D", result: "#A66BFF", name: { en: "Purple", hi: "बैंगनी" } },
+  { a: "#4D9DFF", b: "#FFD93D", result: "#5BD17B", name: { en: "Green", hi: "हरा" } },
+  { a: "#FF4D4D", b: "#FFFFFF", result: "#FF7AB6", name: { en: "Pink", hi: "गुलाबी" } },
+  { a: "#FF4D4D", b: "#5BD17B", result: "#A0673B", name: { en: "Brown", hi: "भूरा" } },
 ];
+
+const ROUNDS: Record<Level, number> = { easy: 3, medium: 5, hard: 8 };
 
 function ColorMix() {
   const lang = useLang();
+  const [level, setLevel] = useState<Level>("easy");
   const [score, setScore] = useState(0);
+  const [round, setRound] = useState(1);
   const [selected, setSelected] = useState<string[]>([]);
-  const mix = useMemo(() => colorMixes[Math.floor(Math.random() * colorMixes.length)], []);
+  const [done, setDone] = useState(false);
 
-  const handleColorClick = (hex: string) => {
-    const newSelected = [...selected, hex];
-    setSelected(newSelected);
-    haptic();
+  const mix = useMemo<Mix>(() => MIXES[Math.floor(Math.random() * MIXES.length)], [round, level]);
 
-    if (newSelected.length === 2) {
-      const isCorrect =
-        (newSelected[0] === mix.color1 && newSelected[1] === mix.color2) ||
-        (newSelected[0] === mix.color2 && newSelected[1] === mix.color1);
+  useEffect(() => { setScore(0); setRound(1); setSelected([]); setDone(false); }, [level]);
 
-      if (isCorrect) {
+  // Distractors plus the two correct ingredients
+  const palette = useMemo(() => {
+    const extras = COLORS_DATA.map((c) => c.hex).filter((h) => h !== mix.a && h !== mix.b);
+    const distract = level === "easy" ? 2 : level === "medium" ? 4 : 6;
+    const pool = [mix.a, mix.b, ...extras.sort(() => Math.random() - 0.5).slice(0, distract)];
+    return pool.sort(() => Math.random() - 0.5);
+  }, [mix, level]);
+
+  const handleColor = (hex: string) => {
+    if (selected.includes(hex) || selected.length === 2 || done) return;
+    haptic(); pop();
+    const next = [...selected, hex];
+    setSelected(next);
+    if (next.length === 2) {
+      const ok = (next[0] === mix.a && next[1] === mix.b) || (next[0] === mix.b && next[1] === mix.a);
+      if (ok) {
         chime();
-        speak(t("correct", lang));
-        addStars(5);
-        setScore((s) => s + 1);
+        speak((lang === "hi" ? "वाह! " : "Wow! ") + mix.name[lang]);
+        const bonus = level === "hard" ? 8 : level === "medium" ? 5 : 3;
+        addStars(bonus);
+        setScore((s) => s + bonus);
+        celebrate("small");
         setTimeout(() => {
+          if (round >= ROUNDS[level]) { celebrate("big"); setDone(true); }
+          else { setRound((r) => r + 1); }
           setSelected([]);
-        }, 1500);
+        }, 1100);
       } else {
         speak(t("tryAgain", lang));
-        setTimeout(() => {
-          setSelected([]);
-        }, 800);
+        setTimeout(() => setSelected([]), 800);
       }
     }
   };
@@ -62,54 +82,58 @@ function ColorMix() {
         <LangToggle />
       </header>
 
-      <section className="px-4 mt-8 text-center">
-        <p className="text-lg font-bold mb-6">{t("colorMixDesc", lang)}</p>
-        <p className="text-2xl font-extrabold text-primary mb-8">⭐ {score}</p>
-
-        {/* Target color */}
-        <div className="max-w-xs mx-auto mb-8">
-          <p className="text-sm text-muted-foreground mb-3">Make this color:</p>
-          <div
-            className="w-24 h-24 rounded-3xl shadow-pop mx-auto border-4 border-primary/30"
-            style={{ backgroundColor: mix.result }}
-          />
-        </div>
-
-        {/* Selected colors */}
-        {selected.length > 0 && (
-          <div className="flex justify-center gap-3 mb-8">
-            {selected.map((hex, idx) => (
-              <div
-                key={idx}
-                className="w-12 h-12 rounded-2xl shadow-pop border-2 border-white"
-                style={{ backgroundColor: hex }}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Color options */}
-        <div className="grid grid-cols-3 gap-3 max-w-xs mx-auto">
-          {COLORS_DATA.slice(0, 6).map((color) => (
-            <button
-              key={color.id}
-              onClick={() => handleColorClick(color.hex)}
-              disabled={selected.length === 2}
-              className="w-16 h-16 rounded-2xl shadow-pop active:scale-95 transition-transform border-3 border-white"
-              style={{
-                backgroundColor: color.hex,
-                opacity: selected.length === 2 ? 0.5 : 1,
-              }}
-            />
-          ))}
-        </div>
-      </section>
-
-      <div className="mt-12 text-center">
-        <Link to="/" className="inline-flex items-center justify-center rounded-2xl bg-gradient-hero text-white font-extrabold py-3 px-8 shadow-pop">
-          🏠 {t("home", lang)}
-        </Link>
+      <div className="flex justify-center mt-4">
+        <LevelPicker level={level} onChange={setLevel} />
       </div>
+
+      <section className="px-4 mt-6 text-center">
+        <div className="flex items-center justify-center gap-3 mb-4 text-sm font-bold">
+          <span className="rounded-full bg-white/80 px-3 py-1 shadow-pop">⭐ {score}</span>
+          <span className="rounded-full bg-white/80 px-3 py-1 shadow-pop">{round}/{ROUNDS[level]}</span>
+        </div>
+
+        {done ? (
+          <div className="py-10">
+            <p className="text-7xl mb-3 animate-bounce-big">🎉</p>
+            <h2 className="text-2xl font-extrabold mb-2">{t("complete", lang)}!</h2>
+            <button onClick={() => { setScore(0); setRound(1); setSelected([]); setDone(false); }} className="mt-4 rounded-2xl bg-gradient-hero text-white font-extrabold py-3 px-8 shadow-pop">
+              🔄 {t("playAgain", lang)}
+            </button>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground mb-2">{lang === "hi" ? "यह रंग बनाओ:" : "Make this color:"}</p>
+            <div
+              className="w-28 h-28 rounded-3xl shadow-pop mx-auto border-4 border-white animate-pulse"
+              style={{ backgroundColor: mix.result }}
+            />
+            <p className="mt-2 text-base font-extrabold">{mix.name[lang]}</p>
+
+            {/* Mixing bowl */}
+            <div className="flex justify-center items-center gap-2 mt-6 mb-4 min-h-[60px]">
+              {selected.length === 0 ? (
+                <p className="text-xs text-muted-foreground">{lang === "hi" ? "२ रंग चुनो" : "Pick 2 colors"}</p>
+              ) : (
+                selected.map((hex, idx) => (
+                  <div key={idx} className="w-14 h-14 rounded-2xl shadow-pop border-2 border-white animate-scale-in" style={{ backgroundColor: hex }} />
+                ))
+              )}
+            </div>
+
+            <div className={`grid gap-3 max-w-xs mx-auto ${palette.length > 6 ? "grid-cols-4" : "grid-cols-3"}`}>
+              {palette.map((hex) => (
+                <button
+                  key={hex}
+                  onClick={() => handleColor(hex)}
+                  disabled={selected.includes(hex) || selected.length === 2}
+                  className="aspect-square rounded-2xl shadow-pop active:scale-95 transition-transform border-2 border-white disabled:opacity-40"
+                  style={{ backgroundColor: hex }}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </section>
     </main>
   );
 }

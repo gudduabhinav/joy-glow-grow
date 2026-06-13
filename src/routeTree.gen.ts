@@ -27,6 +27,7 @@ import { Route as PeekABuddyRouteImport } from './routes/peek-a-buddy'
 import { Route as ParentRouteImport } from './routes/parent'
 import { Route as NumbersRouteImport } from './routes/numbers'
 import { Route as MemoryGardenRouteImport } from './routes/memory-garden'
+import { Route as MadamRouteImport } from './routes/madam'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as FruitsRouteImport } from './routes/fruits'
 import { Route as DailyChallengeRouteImport } from './routes/daily-challenge'
@@ -127,6 +128,11 @@ const MemoryGardenRoute = MemoryGardenRouteImport.update({
   path: '/memory-garden',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MadamRoute = MadamRouteImport.update({
+  id: '/madam',
+  path: '/madam',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LeaderboardRoute = LeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/daily-challenge': typeof DailyChallengeRoute
   '/fruits': typeof FruitsRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/madam': typeof MadamRoute
   '/memory-garden': typeof MemoryGardenRoute
   '/numbers': typeof NumbersRoute
   '/parent': typeof ParentRoute
@@ -212,6 +219,7 @@ export interface FileRoutesByTo {
   '/daily-challenge': typeof DailyChallengeRoute
   '/fruits': typeof FruitsRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/madam': typeof MadamRoute
   '/memory-garden': typeof MemoryGardenRoute
   '/numbers': typeof NumbersRoute
   '/parent': typeof ParentRoute
@@ -242,6 +250,7 @@ export interface FileRoutesById {
   '/daily-challenge': typeof DailyChallengeRoute
   '/fruits': typeof FruitsRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/madam': typeof MadamRoute
   '/memory-garden': typeof MemoryGardenRoute
   '/numbers': typeof NumbersRoute
   '/parent': typeof ParentRoute
@@ -273,6 +282,7 @@ export interface FileRouteTypes {
     | '/daily-challenge'
     | '/fruits'
     | '/leaderboard'
+    | '/madam'
     | '/memory-garden'
     | '/numbers'
     | '/parent'
@@ -302,6 +312,7 @@ export interface FileRouteTypes {
     | '/daily-challenge'
     | '/fruits'
     | '/leaderboard'
+    | '/madam'
     | '/memory-garden'
     | '/numbers'
     | '/parent'
@@ -331,6 +342,7 @@ export interface FileRouteTypes {
     | '/daily-challenge'
     | '/fruits'
     | '/leaderboard'
+    | '/madam'
     | '/memory-garden'
     | '/numbers'
     | '/parent'
@@ -361,6 +373,7 @@ export interface RootRouteChildren {
   DailyChallengeRoute: typeof DailyChallengeRoute
   FruitsRoute: typeof FruitsRoute
   LeaderboardRoute: typeof LeaderboardRoute
+  MadamRoute: typeof MadamRoute
   MemoryGardenRoute: typeof MemoryGardenRoute
   NumbersRoute: typeof NumbersRoute
   ParentRoute: typeof ParentRoute
@@ -509,6 +522,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemoryGardenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/madam': {
+      id: '/madam'
+      path: '/madam'
+      fullPath: '/madam'
+      preLoaderRoute: typeof MadamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/leaderboard': {
       id: '/leaderboard'
       path: '/leaderboard'
@@ -585,6 +605,7 @@ const rootRouteChildren: RootRouteChildren = {
   DailyChallengeRoute: DailyChallengeRoute,
   FruitsRoute: FruitsRoute,
   LeaderboardRoute: LeaderboardRoute,
+  MadamRoute: MadamRoute,
   MemoryGardenRoute: MemoryGardenRoute,
   NumbersRoute: NumbersRoute,
   ParentRoute: ParentRoute,
@@ -607,13 +628,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
