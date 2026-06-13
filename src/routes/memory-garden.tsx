@@ -2,8 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
 import { speak, chime, haptic, pop } from "@/lib/audio";
 import { addStars } from "@/lib/progress";
-import { t, useLang, ANIMALS_DATA } from "@/lib/i18n";
+import { t, useLang, ANIMALS_DATA, FRUITS_DATA } from "@/lib/i18n";
 import { LangToggle } from "@/components/LangToggle";
+import { LevelPicker, type Level } from "@/components/LevelPicker";
+import { celebrate } from "@/lib/celebrate";
 
 export const Route = createFileRoute("/memory-garden")({
   head: () => ({
@@ -15,62 +17,57 @@ export const Route = createFileRoute("/memory-garden")({
   component: MemoryGarden,
 });
 
+const PAIRS: Record<Level, number> = { easy: 3, medium: 6, hard: 8 };
+
+function shuffle<T>(arr: T[]): T[] { return [...arr].sort(() => Math.random() - 0.5); }
+
 function MemoryGarden() {
   const lang = useLang();
-  const animals = useMemo(
-    () => ANIMALS_DATA.slice(0, 4).flatMap((a) => [a, a]).sort(() => Math.random() - 0.5),
-    []
-  );
+  const [level, setLevel] = useState<Level>("easy");
+  const pool = useMemo(() => [...ANIMALS_DATA, ...FRUITS_DATA.map((f) => ({ id: f.id, emoji: f.emoji, en: f.en, hi: f.hi }))], []);
+
+  const make = useMemo(() => () => {
+    const picks = shuffle(pool).slice(0, PAIRS[level]);
+    return shuffle(picks.flatMap((p) => [p, p])).map((p, i) => ({ ...p, key: i }));
+  }, [level, pool]);
+
+  const [cards, setCards] = useState(make);
   const [flipped, setFlipped] = useState<number[]>([]);
   const [matched, setMatched] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
 
+  useEffect(() => { setCards(make()); setFlipped([]); setMatched([]); setMoves(0); }, [level, make]);
+
   const handleFlip = (idx: number) => {
-    if (matched.includes(idx) || flipped.includes(idx)) return;
-    haptic();
-
-    const newFlipped = [...flipped, idx];
-    setFlipped(newFlipped);
-
-    if (newFlipped.length === 2) {
+    if (matched.includes(idx) || flipped.includes(idx) || flipped.length === 2) return;
+    haptic(); pop();
+    const next = [...flipped, idx];
+    setFlipped(next);
+    if (next.length === 2) {
       setMoves((m) => m + 1);
-
-      const id1 = animals[newFlipped[0]].id;
-      const id2 = animals[newFlipped[1]].id;
-
-      if (id1 === id2) {
+      const [a, b] = next;
+      if (cards[a].id === cards[b].id) {
         chime();
-        setMatched([...matched, newFlipped[0], newFlipped[1]]);
-        setFlipped([]);
-
-        if (matched.length + 2 === animals.length) {
-          speak(t("complete", lang));
-          addStars(20);
-        }
+        speak(lang === "hi" ? cards[a].hi : cards[a].en);
+        setTimeout(() => {
+          const newMatched = [...matched, a, b];
+          setMatched(newMatched);
+          setFlipped([]);
+          if (newMatched.length === cards.length) {
+            celebrate("big");
+            const bonus = Math.max(10, PAIRS[level] * 5 - moves);
+            addStars(bonus);
+            speak(t("complete", lang));
+          }
+        }, 500);
       } else {
-        pop();
-        setTimeout(() => setFlipped([]), 1000);
+        setTimeout(() => setFlipped([]), 900);
       }
     }
   };
 
-  const isComplete = matched.length === animals.length;
-
-  if (isComplete) {
-    return (
-      <main className="min-h-screen bg-gradient-to-br from-coral/20 via-background to-mint/10 flex items-center justify-center pb-12">
-        <div className="text-center">
-          <p className="text-7xl mb-4">🎉</p>
-          <h1 className="text-3xl font-extrabold mb-2">{t("complete", lang)}!</h1>
-          <p className="text-lg text-primary font-bold mb-2">🎵 {moves} moves</p>
-          <p className="text-lg text-primary font-bold mb-8">⭐ 20</p>
-          <Link to="/memory-garden" className="inline-flex items-center justify-center rounded-2xl bg-gradient-hero text-white font-extrabold py-3 px-8 shadow-pop">
-            🔄 Again
-          </Link>
-        </div>
-      </main>
-    );
-  }
+  const isComplete = matched.length === cards.length && cards.length > 0;
+  const cols = PAIRS[level] <= 3 ? "grid-cols-3" : PAIRS[level] <= 6 ? "grid-cols-4" : "grid-cols-4";
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-coral/20 via-background to-mint/10 pb-12">
@@ -80,29 +77,47 @@ function MemoryGarden() {
         <LangToggle />
       </header>
 
-      <section className="px-4 mt-8 text-center">
-        <p className="text-lg font-bold mb-4">{t("memoryGardenDesc", lang)}</p>
-        <p className="text-xl font-bold text-primary mb-6">🎵 {moves}</p>
+      <div className="flex justify-center mt-4">
+        <LevelPicker level={level} onChange={setLevel} />
+      </div>
 
-        <div className="grid grid-cols-4 gap-2 max-w-xs mx-auto">
-          {animals.map((animal, idx) => {
-            const isFlipped = flipped.includes(idx) || matched.includes(idx);
-            return (
-              <button
-                key={idx}
-                onClick={() => handleFlip(idx)}
-                disabled={isFlipped}
-                className={`aspect-square rounded-lg shadow-pop active:scale-95 transition-transform font-bold text-2xl ${
-                  isFlipped
-                    ? "bg-white/80 border-2 border-primary/30"
-                    : "bg-gradient-animals text-white border-2 border-white"
-                }`}
-              >
-                {isFlipped ? animal.emoji : "🌿"}
-              </button>
-            );
-          })}
+      <section className="px-4 mt-6 text-center">
+        <div className="flex items-center justify-center gap-3 mb-4 text-sm font-bold">
+          <span className="rounded-full bg-white/80 px-3 py-1 shadow-pop">🎵 {moves}</span>
+          <span className="rounded-full bg-white/80 px-3 py-1 shadow-pop">✨ {matched.length / 2}/{cards.length / 2}</span>
         </div>
+
+        {isComplete ? (
+          <div className="py-10">
+            <p className="text-7xl mb-3 animate-bounce-big">🎉</p>
+            <h2 className="text-2xl font-extrabold mb-2">{t("complete", lang)}!</h2>
+            <button onClick={() => setCards(make())} className="mt-4 rounded-2xl bg-gradient-hero text-white font-extrabold py-3 px-8 shadow-pop">
+              🔄 {t("playAgain", lang)}
+            </button>
+          </div>
+        ) : (
+          <div className={`grid ${cols} gap-2 max-w-sm mx-auto`}>
+            {cards.map((card, idx) => {
+              const isUp = flipped.includes(idx) || matched.includes(idx);
+              return (
+                <button
+                  key={card.key}
+                  onClick={() => handleFlip(idx)}
+                  disabled={isUp}
+                  className={`aspect-square rounded-xl shadow-pop active:scale-95 transition-all font-bold text-3xl ${
+                    matched.includes(idx)
+                      ? "bg-mint/40 border-2 border-mint scale-95 opacity-70"
+                      : isUp
+                      ? "bg-white border-2 border-primary"
+                      : "bg-gradient-animals text-white border-2 border-white"
+                  }`}
+                >
+                  {isUp ? card.emoji : "🌿"}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </section>
     </main>
   );
